@@ -87,22 +87,12 @@
         <div class="container">
             <div class="list-product-block style-grid relative">
 
-                {% if messages %}
-                    <div class="container mt-3">
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}" role="alert">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+                {% if business.products or business.business_type == 'product' or business.business_type == 'both' %}
 
-                {% if business.products %}
-                
                 <div class="filter-heading flex items-center justify-between gap-5 flex-wrap">
                     <div class="left flex has-line items-center flex-wrap gap-5">
                         <div class="heading6 mt-7">Products</div>
-                        {% if request.user.is_authenticated and request.user == business.seller %}
+                        {% if request.user.is_authenticated and request.user == business.seller and business.business_type in 'product,both' %}
                             <a href="{% url 'product_create' business.business_slug %}"><div
                                 class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-6">
                                 Add Products
@@ -138,7 +128,7 @@
                                         document.getElementById("quickview-sku").innerText = data.sku;
                                         document.getElementById("quickview-categories").innerText = data.categories.join(", ");
                                         document.getElementById("quickview-tags").innerText = data.tags.join(", ");
-                                      
+
                                         const imagesContainer = document.getElementById("quickview-images");
                                         imagesContainer.innerHTML = "";
                                         data.images.forEach(imageUrl => {
@@ -147,7 +137,7 @@
                                             imgElement.innerHTML = `<img src="${imageUrl}" alt="product image" class="w-full h-full object-cover">`;
                                             imagesContainer.appendChild(imgElement);
                                         });
-                                      
+
                                         const colorsContainer = document.getElementById("quickview-colors");
                                         colorsContainer.innerHTML = "";
                                         data.color_variations.forEach(variation => {
@@ -155,7 +145,7 @@
                                             colorItem.classList.add("color-item", "w-12", "h-12", "rounded-xl", "duration-300", "relative");
                                             colorItem.dataset.variationId = variation.values__id;
                                             colorItem.dataset.color = variation.values__value;
-                                      
+
                                             if (variation.values__image) {
                                                 const imgElement = document.createElement("img");
                                                 imgElement.src = `/product_variations/${variation.values__image.split('/').pop()}`; // Update the image URL here
@@ -163,21 +153,21 @@
                                                 imgElement.classList.add("rounded-xl");
                                                 colorItem.appendChild(imgElement);
                                             }
-                                      
+
                                             const tagAction = document.createElement("div");
                                             tagAction.classList.add("tag-action", "bg-black", "text-white", "caption2", "capitalize", "px-1.5", "py-0.5", "rounded-sm");
                                             tagAction.innerText = variation.values__value;
                                             colorItem.appendChild(tagAction);
-                                      
+
                                             colorItem.addEventListener("click", function() {
                                                 colorsContainer.querySelectorAll('.color-item').forEach(i => i.classList.remove('active'));
                                                 colorItem.classList.add('active');
                                                 document.querySelector('#selected-color').innerText = `Color: ${variation.values__value}`;
                                             });
-                                      
+
                                             colorsContainer.appendChild(colorItem);
                                         });
-                                      
+
                                         const sizesContainer = document.getElementById("quickview-sizes");
                                         sizesContainer.innerHTML = "";
                                         data.size_variations.forEach(variation => {
@@ -186,13 +176,13 @@
                                           sizeItem.dataset.variationId = variation.values__id;
                                           sizeItem.dataset.size = variation.values__value;
                                           sizeItem.innerText = variation.values__value;
-                                      
+
                                           sizeItem.addEventListener("click", function() {
                                             sizesContainer.querySelectorAll('.size-item').forEach(i => i.classList.remove('active'));
                                             sizeItem.classList.add('active');
                                             document.querySelector('#selected-size').innerText = `Size: ${variation.values__value}`;
                                           });
-                                      
+
                                           sizesContainer.appendChild(sizeItem);
                                         });
                                     }
@@ -201,21 +191,21 @@
                                         const quickViewButtons = document.querySelectorAll(".quick-view-btn");
                                         const modalQuickViewBlock = document.querySelector(".modal-quickview-block");
                                         const closeQuickViewButton = document.querySelector(".modal-quickview-block .close-btn");
-                                
+
                                         quickViewButtons.forEach(button => {
                                             button.addEventListener("click", function() {
                                                 const productSlug = button.dataset.productSlug;
                                                 const businessSlug = button.dataset.businessSlug;
-                                
+
                                                 console.log('Quick View Button:', button);
                                                 console.log('Product Slug:', productSlug);
                                                 console.log('Business Slug:', businessSlug);
-                                
+
                                                 if (!productSlug || !businessSlug) {
                                                     console.error('Product Slug or Business Slug is missing');
                                                     return;
                                                 }
-                                
+
                                                 fetch(`/ajax/product/${businessSlug}/${productSlug}/`)
                                                     .then(response => {
                                                         console.log('Response status:', response.status);
@@ -234,11 +224,11 @@
                                                     });
                                             });
                                         });
-                                
+
                                         closeQuickViewButton.addEventListener("click", function() {
                                             modalQuickViewBlock.style.display = "none";
                                         });
-                                
+
                                         modalQuickViewBlock.addEventListener("click", function(event) {
                                             if (event.target === modalQuickViewBlock) {
                                                 modalQuickViewBlock.style.display = "none";
@@ -248,21 +238,21 @@
 
                                        console.log('Product ID from template:', {{ product.id|safe }});
                                        const quickViewButtons = document.querySelectorAll('.quick-view-btn');
-                                   
+
                                        quickViewButtons.forEach(button => {
                                            button.addEventListener('click', () => {
                                                const productSlug = button.dataset.productSlug;
                                                const businessSlug = button.dataset.businessSlug;
-                                   
+
                                                console.log('Quick View Button:', button);
                                                console.log('Product Slug:', productSlug);
                                                console.log('Business Slug:', businessSlug);
-                                   
+
                                                if (!productSlug || !businessSlug) {
                                                    console.error('Product Slug or Business Slug is missing');
                                                    return;
                                                }
-                                   
+
                                                fetch(`/ajax/product/${businessSlug}/${productSlug}/`)
                                                .then(response => {
                                                    console.log('Response status:', response.status);
@@ -282,17 +272,14 @@
                                            });
                                        });
                                    </script>
-                                            <script>
-                                                console.log('Product JSON data:', '{{ product.get_json_data }}');
-                                            </script>
-                                            
+
                                             <a href="{% url 'quick_shop' product.product_slug %}">
                                                 <div class="quick-shop-btn text-button-uppercase py-2 text-center rounded-full duration-500 bg-white hover:bg-black hover:text-white">
                                                     Quick Buy
                                                 </div>
                                             </a>
-                                       
-                                            
+
+
                                                 <div class="quick-shop-block absolute left-5 right-5 bg-white p-5 rounded-[20px]">
                                                     <div class="list-size flex items-center justify-center flex-wrap gap-2">
                                                         <div key="0" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XS</div><div key="1" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">S</div><div key="2" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">M</div><div key="3" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">L</div><div key="4" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XL</div><div key="5" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">2XL</div>
@@ -301,45 +288,55 @@
                                                         Buy Now
                                                     </div>
                                                     </div>
-                                
+
                                             </div>
                                         </div>
                                         <div class="product-infor mt-4 lg:mb-7">
                                             <div class="product-name text-title duration-300"><a href="{% url "product_detail" product.business.business_slug product.product_slug %}">{{ product.name }}</a></div>
                                                 {% if product.variation %}
                                                     <div class="list-color list-color-image max-md:hidden flex items-center gap-3 flex-wrap duration-500">
-                                                        
+
                                                             <div class="color-item w-12 h-12 rounded-xl duration-300 relative" key="0">
                                                                 <img src="./assets/images/product/color/white.png" alt="color" class="rounded-xl w-full h-full object-cover">
                                                                 <div class="tag-action bg-black text-white caption2 capitalize px-1.5 py-0.5 rounded-sm">white</div>
                                                             </div>
-                                                        
+
                                                             <div class="color-item w-12 h-12 rounded-xl duration-300 relative" key="1">
                                                                 <img src="./assets/images/product/color/purple.png" alt="color" class="rounded-xl w-full h-full object-cover">
                                                                 <div class="tag-action bg-black text-white caption2 capitalize px-1.5 py-0.5 rounded-sm">purple</div>
                                                             </div>
-                                                        
+
                                                     </div>
                                                 {% endif %}
-                                            
+
                                     <div class="product-price-block flex items-center gap-2 flex-wrap mt-1 duration-300 relative z-[1]">
                                     <div class="product-price text-title">${{ product.price }}</div>
-                                    
+
                                         </div>
                                     </div>
                                 </div>
-                            
+
                         </div>
+                    {% empty %}
+                        {% if request.user.is_authenticated and request.user == business.seller %}
+                            <div class="col-span-full text-center mt-6">
+                                <p>You haven't added any products yet.</p>
+                            </div>
+                        {% else %}
+                            <div class="col-span-full text-center mt-6">
+                                <p>This business hasn't added any products yet.</p>
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}
 
-                {% if business.services %}
-               
+                {% if business.services or business.business_type == 'service' or business.business_type == 'both' %}
+
                 <div class="filter-heading flex items-center justify-between gap-5 flex-wrap">
                     <div class="left flex has-line items-center flex-wrap gap-5">
                         <div class="heading6 mt-7">Services</div>
-                        {% if request.user.is_authenticated and request.user == business.seller %}
+                        {% if request.user.is_authenticated and request.user == business.seller and business.business_type in 'service,both' %}
                             <a href="{% url 'service_create' business.business_slug %}"><div
                                 class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-6">
                                 Add Services
@@ -356,51 +353,61 @@
                                     <div class="product-tag text-button-uppercase bg-green px-3 py-0.5 inline-block rounded-full absolute top-3 left-3 z-[1]">New</div>
                                     <div class="product-img w-full h-full aspect-[3/4]">
                                         <a href="{% url "service_detail" service.business.business_slug service.service_slug %}">
-                                        <img key="0" class="w-full h-full object-cover duration-700" src="{{ service.image.url }}" alt="img"><img key="1" class="w-full h-full object-cover duration-700" src="{{ product.image2.url }}" alt="img">
+                                        <img key="0" class="w-full h-full object-cover duration-700" src="{{ service.image.url }}" alt="img">
                                         </a>
                                     </div>
                                     <div class="list-action grid grid-cols-2 gap-3 px-5 absolute w-full bottom-5 max-lg:hidden">
-                                        
-                                       
-                                            
+
+
+
                                                 <div class="quick-shop-block absolute left-5 right-5 bg-white p-5 rounded-[20px]">
                                                     <div class="list-size flex items-center justify-center flex-wrap gap-2">
                                                         <div key="0" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XS</div><div key="1" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">S</div><div key="2" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">M</div><div key="3" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">L</div><div key="4" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XL</div><div key="5" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">2XL</div>
                                                     </div>
                                                     </div>
-                                
+
                                             </div>
                                         </div>
                                         <div class="product-infor mt-4 lg:mb-7">
                                             <div class="product-name text-title duration-300"><a href="{% url "service_detail" service.business.business_slug service.service_slug %}">{{ service.name }}</a></div>
                                                 {% if product.variation %}
                                                     <div class="list-color list-color-image max-md:hidden flex items-center gap-3 flex-wrap duration-500">
-                                                        
+
                                                             <div class="color-item w-12 h-12 rounded-xl duration-300 relative" key="0">
                                                                 <img src="./assets/images/product/color/white.png" alt="color" class="rounded-xl w-full h-full object-cover">
                                                                 <div class="tag-action bg-black text-white caption2 capitalize px-1.5 py-0.5 rounded-sm">white</div>
                                                             </div>
-                                                        
+
                                                             <div class="color-item w-12 h-12 rounded-xl duration-300 relative" key="1">
                                                                 <img src="./assets/images/product/color/purple.png" alt="color" class="rounded-xl w-full h-full object-cover">
                                                                 <div class="tag-action bg-black text-white caption2 capitalize px-1.5 py-0.5 rounded-sm">purple</div>
                                                             </div>
-                                                        
+
                                                     </div>
                                                 {% endif %}
-                                            
+
                                     <div class="product-price-block flex items-center gap-2 flex-wrap mt-1 duration-300 relative z-[1]">
                                     <div class="product-price text-title">${{ service.price }}</div>
-                                    
+
                                         </div>
                                     </div>
                                 </div>
-                            
+
                         </div>
+                    {% empty %}
+                        {% if request.user.is_authenticated and request.user == business.seller %}
+                            <div class="col-span-full text-center mt-6">
+                                <p>You haven't added any services yet.</p>
+                            </div>
+                        {% else %}
+                            <div class="col-span-full text-center mt-6">
+                                <p>This business hasn't added any services yet.</p>
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}
-                
+
                 <div class="list-pagination w-full flex items-center justify-center gap-4 mt-10"></div>
                 <div class="item mb-4">
                     <div class="heading6">About {{ business.business_name }}</div>

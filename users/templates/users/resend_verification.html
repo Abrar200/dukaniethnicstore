@@ -1,0 +1,84 @@
+{% extends "business/base.html" %}
+{% load static %}
+
+{% block slider %}
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Resend Verification Email</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='{% url "home" %}'>Home</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Resend Verification</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock slider %}
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}
+<div class="register-block md:py-20 py-10">
+    <div class="container">
+        <div class="content-main flex gap-y-8 max-md:flex-col">
+            <div class="left md:w-1/2 w-full lg:pr-[60px] md:pr-[40px] md:border-r border-line">
+                <div class="heading4">Resend Verification Email</div>
+                <div class="body1 mt-2">Enter your email address to receive a new verification link.</div>
+
+                <form class="md:mt-7 mt-4" action="{% url 'resend_verification' %}" method="post">
+                    {% csrf_token %}
+                    <div class="email">
+                        <input name="email" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="email" placeholder="Email Address *" required />
+                    </div>
+                    <div class="block-button md:mt-7 mt-4">
+                        <button class="button-main">Send Verification Email</button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <div class="text-button">
+                        Remember your password? <a href='{% url "login" %}' class="text-button text-primary">Login here</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right md:w-1/2 w-full lg:pl-[60px] md:pl-[40px] flex items-center">
+                <div class="text-content">
+                    <div class="heading4">Email Verification</div>
+                    <div class="mt-2 text-secondary">
+                        We need to verify your email address to ensure the security of your account.
+                        Once verified, you'll be able to access all features of your account.
+                    </div>
+                    <div class="list-feature mt-6">
+                        <div class="item flex items-center gap-3">
+                            <i class="ph ph-check-circle text-2xl text-green"></i>
+                            <div class="text-secondary">Secure account verification</div>
+                        </div>
+                        <div class="item flex items-center gap-3 mt-3">
+                            <i class="ph ph-check-circle text-2xl text-green"></i>
+                            <div class="text-secondary">Quick and easy process</div>
+                        </div>
+                        <div class="item flex items-center gap-3 mt-3">
+                            <i class="ph ph-check-circle text-2xl text-green"></i>
+                            <div class="text-secondary">Protection against unauthorized access</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

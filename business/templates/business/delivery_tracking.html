@@ -1,0 +1,205 @@
+<!-- Create business/templates/business/delivery_tracking.html -->
+{% extends "business/base.html" %}
+
+{% load static %}
+
+{% block title %}Track Delivery - {{ delivery.external_delivery_id }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-2xl font-bold mb-2">Delivery Tracking</h1>
+                    <p class="text-gray-600">Order #{{ order.ref_code }}</p>
+                    <p class="text-gray-600">Delivery ID: {{ delivery.external_delivery_id }}</p>
+                </div>
+                <div class="text-right">
+                    <span class="inline-block px-3 py-1 rounded-full text-sm font-medium
+                        {% if delivery.delivery_status == 'delivered' %}bg-green-100 text-green-800
+                        {% elif delivery.delivery_status == 'picked_up' %}bg-blue-100 text-blue-800
+                        {% elif delivery.delivery_status == 'dasher_confirmed' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ delivery.get_delivery_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Progress -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Delivery Progress</h2>
+
+            <div class="relative">
+                <!-- Progress Line -->
+                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+
+                <!-- Status Steps -->
+                <div class="space-y-6">
+                    <!-- Order Created -->
+                    <div class="relative flex items-center">
+                        <div class="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                            <i class="ph ph-check text-white"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-medium">Order Confirmed</h3>
+                            <p class="text-sm text-gray-600">{{ delivery.created_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Dasher Assigned -->
+                    <div class="relative flex items-center">
+                        <div class="flex-shrink-0 w-8 h-8
+                            {% if delivery.delivery_status == 'created' %}bg-gray-300{% else %}bg-green-500{% endif %}
+                            rounded-full flex items-center justify-center">
+                            <i class="ph ph-user text-white"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-medium">Dasher Assigned</h3>
+                            {% if delivery.delivery_status != 'created' %}
+                                <p class="text-sm text-gray-600">Dasher is on the way to pickup</p>
+                            {% else %}
+                                <p class="text-sm text-gray-400">Waiting for dasher assignment</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Picked Up -->
+                    <div class="relative flex items-center">
+                        <div class="flex-shrink-0 w-8 h-8
+                            {% if delivery.delivery_status in 'created,dasher_confirmed' %}bg-gray-300{% else %}bg-green-500{% endif %}
+                            rounded-full flex items-center justify-center">
+                            <i class="ph ph-package text-white"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-medium">Order Picked Up</h3>
+                            {% if delivery.pickup_time_actual %}
+                                <p class="text-sm text-gray-600">{{ delivery.pickup_time_actual|date:"M d, Y H:i" }}</p>
+                            {% elif delivery.delivery_status == 'picked_up' %}
+                                <p class="text-sm text-gray-600">Order has been picked up</p>
+                            {% else %}
+                                <p class="text-sm text-gray-400">
+                                    {% if delivery.pickup_time_estimated %}
+                                        Estimated pickup: {{ delivery.pickup_time_estimated|date:"H:i" }}
+                                    {% else %}
+                                        Waiting for pickup
+                                    {% endif %}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Delivered -->
+                    <div class="relative flex items-center">
+                        <div class="flex-shrink-0 w-8 h-8
+                            {% if delivery.delivery_status == 'delivered' %}bg-green-500{% else %}bg-gray-300{% endif %}
+                            rounded-full flex items-center justify-center">
+                            <i class="ph ph-house text-white"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-medium">Delivered</h3>
+                            {% if delivery.dropoff_time_actual %}
+                                <p class="text-sm text-gray-600">{{ delivery.dropoff_time_actual|date:"M d, Y H:i" }}</p>
+                            {% elif delivery.delivery_status == 'delivered' %}
+                                <p class="text-sm text-gray-600">Order has been delivered</p>
+                            {% else %}
+                                <p class="text-sm text-gray-400">
+                                    {% if delivery.dropoff_time_estimated %}
+                                        Estimated delivery: {{ delivery.dropoff_time_estimated|date:"H:i" }}
+                                    {% else %}
+                                        Pending delivery
+                                    {% endif %}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Details -->
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <!-- Pickup Information -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-3">Pickup Information</h3>
+                <div class="space-y-2">
+                    <p><strong>Location:</strong></p>
+                    <p class="text-gray-600">{{ delivery.pickup_address }}</p>
+                    {% if delivery.pickup_time_estimated %}
+                        <p><strong>Estimated Pickup:</strong> {{ delivery.pickup_time_estimated|date:"M d, Y H:i" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Delivery Information -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-3">Delivery Information</h3>
+                <div class="space-y-2">
+                    <p><strong>Address:</strong></p>
+                    <p class="text-gray-600">{{ delivery.dropoff_address }}</p>
+                    {% if delivery.dropoff_time_estimated %}
+                        <p><strong>Estimated Delivery:</strong> {{ delivery.dropoff_time_estimated|date:"M d, Y H:i" }}</p>
+                    {% endif %}
+                    <p><strong>Delivery Fee:</strong> ${{ delivery.delivery_fee }}</p>
+                    {% if delivery.tip_amount > 0 %}
+                        <p><strong>Tip:</strong> ${{ delivery.tip_amount }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-3">Order Items</h3>
+            <div class="space-y-3">
+                {% for item in order.items.all %}
+                <div class="flex justify-between items-center border-b pb-3">
+                    <div>
+                        <h4 class="font-medium">{{ item.product.name }}</h4>
+                        {% if item.variations %}
+                            <p class="text-sm text-gray-600">{{ item.variations }}</p>
+                        {% endif %}
+                        <p class="text-sm text-gray-600">Quantity: {{ item.quantity }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-medium">${{ item.price }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    {% if delivery.tracking_url %}
+                        <a href="{{ delivery.tracking_url }}" target="_blank"
+                           class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="ph ph-map-pin mr-2"></i>
+                            Track on DoorDash
+                        </a>
+                    {% endif %}
+                </div>
+                <div>
+                    <a href="{% url 'user_orders' %}"
+                       class="text-gray-600 hover:text-gray-800 transition duration-200">
+                        ← Back to Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-refresh page every 30 seconds to get latest delivery status
+    {% if delivery.delivery_status != 'delivered' and delivery.delivery_status != 'cancelled' %}
+        setTimeout(function() {
+            location.reload();
+        }, 30000);
+    {% endif %}
+</script>
+{% endblock %}

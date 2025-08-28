@@ -1,5 +1,4 @@
 {% extends "business/base.html" %}
-
 {% load static %}
 
 {% block slider %}
@@ -37,15 +36,15 @@
         <!-- Filter toggle and create event button for all screen sizes -->
         <div class="mb-4 flex flex-col md:flex-row gap-4">
             <button id="toggleFilters" class="w-full md:w-auto py-2 px-4 bg-gray-200 text-gray-800 rounded" style="padding: 10px; background-color: #f0f0f0; border: none; text-align: left; font-weight: bold; cursor: pointer;">
-                Filter by Country and State
+                Filter Events
             </button>
-            <a href="{% url "create_event" %}">
-                <button class="w-full md:w-auto py-2 px-4 bg-gray-200 text-gray-800 rounded" style="padding: 10px; background-color: #f0f0f0; border: none; text-align: left; font-weight: bold; cursor: pointer;">
+            <a href="{% url 'create_event' %}">
+                <button class="w-full md:w-auto py-2 px-4 bg-gray-200 text-gray-800 rounded" style="padding: 10px; background-color: #f0f0f0; border: none; text-align: left; font-weight: bold; cursor: pointer; margin-bottom: 25px;">
                     Create an Event
                 </button>
             </a>
             {% if request.user.is_authenticated %}
-                <a href="{% url "saved_events" %}">
+                <a href="{% url 'saved_events' %}">
                     <button class="w-full md:w-auto py-2 px-4 bg-gray-200 text-gray-800 rounded" style="padding: 10px; background-color: #f0f0f0; border: none; text-align: left; font-weight: bold; cursor: pointer; margin-bottom: 25px;">
                         View Saved Events
                     </button>
@@ -60,7 +59,57 @@
                     <i class="fa fa-times-circle-o" style="font-size: 20px;" aria-hidden="true"></i>
                 </button>
                 <form id="filter-form" method="get" class="mb-4">
-                    <div class="filter-brand pb-8">
+                    <!-- Top Events Filter -->
+                    <div class="filter-section pb-6 border-b">
+                        <div class="heading6">Featured Events</div>
+                        <div class="mt-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="top_events" value="true" {% if show_top_events %}checked{% endif %}>
+                                <span>Show Top Events Only</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Event Type Filter -->
+                    <div class="filter-section py-6 border-b">
+                        <div class="heading6">Event Type</div>
+                        <div class="mt-4">
+                            <select name="event_type" class="w-full border border-line px-4 py-3 rounded-lg">
+                                <option value="">All Types</option>
+                                {% for value, label in event_types %}
+                                <option value="{{ value }}" {% if value == selected_event_type %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date Filter -->
+                    <div class="filter-section py-6 border-b">
+                        <div class="heading6">Date</div>
+                        <div class="mt-4 space-y-2">
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="date_filter" value="" {% if not selected_date_filter %}checked{% endif %}>
+                                <span>All Dates</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="date_filter" value="today" {% if selected_date_filter == 'today' %}checked{% endif %}>
+                                <span>Today</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="date_filter" value="next_week" {% if selected_date_filter == 'next_week' %}checked{% endif %}>
+                                <span>Next Week</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="date_filter" value="next_month" {% if selected_date_filter == 'next_month' %}checked{% endif %}>
+                                <span>Next Month</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Country Filter -->
+                    <div class="filter-brand py-6 border-b">
                         <div class="heading6">Countries</div>
                         <div class="list-brand mt-4">
                             {% for country in countries %}
@@ -78,7 +127,11 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <div class="heading6 mt-8">States</div>
+                    </div>
+
+                    <!-- State Filter -->
+                    <div class="filter-brand py-6">
+                        <div class="heading6">States</div>
                         <div class="list-brand mt-4">
                             {% for state in states %}
                             <div class="brand-item flex items-center justify-between" data-item="states">
@@ -105,14 +158,23 @@
                     <div class="event-card bg-white rounded-lg shadow-md overflow-hidden relative" data-event-id="{{ event.id }}">
                         <a href="{% url 'event_detail' event.id %}" class="block">
                             <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" class="w-full h-40 object-cover">
+                            {% if event.top_event %}
+                                <div class="absolute top-0 right-0 bg-yellow-400 text-black px-2 py-1 text-sm font-semibold">
+                                    Top Event
+                                </div>
+                            {% endif %}
                             <div class="p-4">
                                 <h3 class="heading6 truncate">{{ event.title }}</h3>
                                 <div class="text-sm text-gray-600 mt-2">
-                                    <div class="flex items-center">
+                                    <div class="flex items-center mb-1">
+                                        <i class="ph-tag text-lg mr-2"></i>
+                                        <span>{{ event.get_event_type_display }}</span>
+                                    </div>
+                                    <div class="flex items-center mb-1">
                                         <i class="ph-calendar text-lg mr-2"></i>
                                         <span>{{ event.start_time|date:"F d, Y, g:i A" }}</span>
                                     </div>
-                                    <div class="flex items-center mt-1">
+                                    <div class="flex items-center">
                                         <i class="ph-map-pin text-lg mr-2"></i>
                                         <span class="truncate">{{ event.location }}</span>
                                     </div>
@@ -129,8 +191,12 @@
                                 {% else %}
                                 <i class="fa fa-heart-o" aria-hidden="true"></i>
                                 {% endif %}
-                            </button>                        
+                            </button>
                         {% endif %}
+                    </div>
+                {% empty %}
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-gray-500">No events found matching your criteria.</p>
                     </div>
                 {% endfor %}
             </div>
@@ -186,7 +252,7 @@
         const toggleFiltersBtn = document.getElementById('toggleFilters');
         const filterContent = document.getElementById('filterContent');
         const closeFiltersBtn = document.getElementById('closeFilters');
-        const saveButtons = document.querySelectorAll('.save-button');
+        const filterForm = document.getElementById('filter-form');
 
         // Ensure filter content is hidden by default
         filterContent.style.display = 'none';
@@ -201,14 +267,28 @@
             filterContent.style.display = 'none';
         });
 
-        // Handle checkbox changes for filtering
-        const checkboxes = filterContent.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const formData = new FormData(document.getElementById('filter-form'));
-                const queryString = new URLSearchParams(formData).toString();
+        // Function to handle filter changes
+        const handleFilterChange = () => {
+            const formData = new FormData(filterForm);
+            const queryString = new URLSearchParams(formData).toString();
+            window.location.href = `?${queryString}`;
+        };
 
-                fetch(`/events/?${queryString}`, {
+        // Attach change event listeners to all form inputs
+        filterForm.querySelectorAll('input[type="checkbox"], input[type="radio"], select').forEach(input => {
+            input.addEventListener('change', handleFilterChange);
+        });
+
+        // Update the save event handler in the script section
+        // Handle save event functionality
+        document.querySelectorAll('.save-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const eventId = this.dataset.eventId;
+                const heartIcon = this.querySelector('i.fa');
+
+                fetch(`/save_event/${eventId}/`, {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
@@ -216,90 +296,41 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    const eventList = document.getElementById('event-list');
-                    eventList.innerHTML = '';
-
-                    if (data.events.length === 0) {
-                        const noEventsMessage = document.createElement('p');
-                        noEventsMessage.textContent = 'No events found.';
-                        eventList.appendChild(noEventsMessage);
-                    } else {
-                        data.events.forEach(event => {
-                            const eventCard = document.createElement('div');
-                            eventCard.classList.add('event-card', 'bg-white', 'rounded-lg', 'shadow-md', 'overflow-hidden', 'relative');
-                            eventCard.setAttribute('data-event-id', event.id);
-                        
-                            eventCard.innerHTML = `
-                                <a href="/event/${event.id}/" class="block">
-                                    <img src="${event.banner_image}" alt="${event.title}" class="w-full h-40 object-cover">
-                                    <div class="p-4">
-                                        <h3 class="heading6 truncate">${event.title}</h3>
-                                        <div class="text-sm text-gray-600 mt-2">
-                                            <div class="flex items-center">
-                                                <i class="ph-calendar text-lg mr-2"></i>
-                                                <span>${new Date(event.start_time).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                                            </div>
-                                            <div class="flex items-center mt-1">
-                                                <i class="ph-map-pin text-lg mr-2"></i>
-                                                <span class="truncate">${event.location}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                                <button class="share-button absolute top-2 right-2 bg-white rounded-full p-2 shadow-md">
-                                    <i class="ph ph-arrow-bend-up-right"></i>
-                                </button>
-                                <button class="save-button absolute top-2 left-2 bg-white rounded-full p-2 shadow-md" data-event-id="${event.id}">
-                                    <i class="fa fa-heart${event.is_saved ? '' : '-o'}" style="color: ${event.is_saved ? '#f41b17' : ''};" aria-hidden="true"></i>
-                                </button>
-                            `;
-                        
-                            eventList.appendChild(eventCard);
-                        });
+                    if (data.status === 'saved') {
+                        // Update to filled heart with red color
+                        heartIcon.className = 'fa fa-heart';
+                        heartIcon.style.color = '#f41b17';
+                    } else if (data.status === 'removed') {
+                        // Update to outline heart with no color
+                        heartIcon.className = 'fa fa-heart-o';
+                        heartIcon.style.color = '';
                     }
-                    // Reattach event listeners to new elements
-                    attachEventListeners();
                 })
                 .catch(error => console.error('Error:', error));
             });
         });
 
-        function attachEventListeners() {
-            // Handle save event
-            document.querySelectorAll('.save-button').forEach(button => {
-                button.addEventListener('click', function() {
-                    const eventId = this.dataset.eventId;
-
-                    fetch(`/save_event/${eventId}/`, {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'saved' || data.status === 'removed') {
-                            window.location.reload();  // Reload the page to reflect changes
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-                });
+        // Handle share functionality
+        document.querySelectorAll('.share-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const eventUrl = this.closest('.event-card').querySelector('a').href;
+                if (navigator.share) {
+                    navigator.share({
+                        title: this.closest('.event-card').querySelector('.heading6').textContent,
+                        url: eventUrl
+                    }).catch(console.error);
+                } else {
+                    // Fallback to copying to clipboard
+                    navigator.clipboard.writeText(eventUrl).then(() => {
+                        alert('Event link copied to clipboard!');
+                    }).catch(err => {
+                        console.error('Failed to copy link:', err);
+                    });
+                }
             });
-
-            // Handle share event
-            document.querySelectorAll('.share-button').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const eventUrl = this.closest('.event-card').querySelector('a').href;
-                    // Implement your share functionality here
-                    console.log('Share URL:', eventUrl);
-                });
-            });
-        }
-
-        // Initial attachment of event listeners
-        attachEventListeners();
+        });
     });
 </script>
 

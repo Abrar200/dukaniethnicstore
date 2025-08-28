@@ -59,6 +59,7 @@
                             <option value="default">Choose Business Type *</option>
                             <option value="product" {% if business.business_type == 'product' %}selected{% endif %}>Product Business</option>
                             <option value="service" {% if business.business_type == 'service' %}selected{% endif %}>Service Business</option>
+                            <option value="both" {% if business.business_type == 'both' %}selected{% endif %}>Both Product & Service Business</option>
                         </select>
                         <i class="ph-bold ph-caret-down arrow-down text-xl"></i>
                     </div>
@@ -87,6 +88,13 @@
                     <div class="email mt-5">
                         <input name="address" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Address *" value="{{ business.address }}" required />
                     </div>
+
+                    <!-- Added Postcode Field -->
+                    <div class="email mt-5">
+                        <input name="postcode" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Postcode *" value="{{ business.postcode }}" maxlength="4" pattern="[0-9]{4}" title="Please enter a 4-digit Australian postcode" required />
+                        <small class="text-secondary mt-1 block">4-digit Australian postcode</small>
+                    </div>
+
                     <div class="email mt-5">
                         <input name="phone" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Phone Number *" value="{{ business.phone }}" required />
                     </div>
@@ -109,15 +117,34 @@
                     </div>
                     <div class="opening-hours mt-5">
                         <h3 class="text-lg font-semibold mb-3">Opening Hours</h3>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4">
                             {% for day, day_display in day_choices %}
                             {% with opening_hour=business.opening_hours.all|get_opening_hour:day %}
-                            <div class="flex items-center">
-                                <input type="checkbox" name="opening_hours-{{ day }}-is_closed" id="opening_hours-{{ day }}-is_closed" class="mr-2" {% if opening_hour.is_closed %}checked value="on"{% endif %}>
-                                <label for="opening_hours-{{ day }}-is_closed" class="mr-2">{{ day_display }} (Closed)</label>
-                                <input type="time" name="opening_hours-{{ day }}-opening_time" id="opening_hours-{{ day }}-opening_time" class="border-line px-4 py-2 rounded-lg" placeholder="Opening Time" {% if not opening_hour.is_closed %}value="{{ opening_hour.opening_time|time:'H:i' }}"{% endif %}>
-                                <span class="mx-2">-</span>
-                                <input type="time" name="opening_hours-{{ day }}-closing_time" id="opening_hours-{{ day }}-closing_time" class="border-line px-4 py-2 rounded-lg" placeholder="Closing Time" {% if not opening_hour.is_closed %}value="{{ opening_hour.closing_time|time:'H:i' }}"{% endif %}>
+                            <div class="flex flex-col">
+                                <label class="mr-2 font-medium">{{ day_display }}</label>
+                                <div class="flex items-center">
+                                    <input type="time"
+                                           name="opening_hours-{{ day }}-opening_time"
+                                           id="opening_hours-{{ day }}-opening_time"
+                                           class="border-line px-4 py-2 rounded-lg"
+                                           placeholder="Opening Time"
+                                           {% if not opening_hour.is_closed %}value="{{ opening_hour.opening_time|time:'H:i' }}"{% endif %}>
+                                    <span class="mx-2">-</span>
+                                    <input type="time"
+                                           name="opening_hours-{{ day }}-closing_time"
+                                           id="opening_hours-{{ day }}-closing_time"
+                                           class="border-line px-4 py-2 rounded-lg"
+                                           placeholder="Closing Time"
+                                           {% if not opening_hour.is_closed %}value="{{ opening_hour.closing_time|time:'H:i' }}"{% endif %}>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input type="checkbox"
+                                           name="opening_hours-{{ day }}-is_closed"
+                                           id="opening_hours-{{ day }}-is_closed"
+                                           class="mr-2"
+                                           {% if opening_hour.is_closed %}checked{% endif %}>
+                                    <label for="opening_hours-{{ day }}-is_closed" class="mr-2">Closed this day</label>
+                                </div>
                             </div>
                             {% endwith %}
                             {% endfor %}
@@ -127,7 +154,7 @@
                         <button type="submit" class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Update Business</button>
                     </div>
                 </form>
-                
+
             </div>
             <div class="right lg:w-1/4 lg:pl-4">
                 <div class="item">
@@ -146,5 +173,102 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Add this to your page's JavaScript for the opening hours functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all "Closed" checkboxes
+        const closedCheckboxes = document.querySelectorAll('[id$="-is_closed"]');
+
+        // Add event listeners to each checkbox
+        closedCheckboxes.forEach(function(checkbox) {
+            // Get the day from the checkbox id
+            const day = checkbox.id.match(/opening_hours-(\w+)-is_closed/)[1];
+
+            // Get the opening and closing time inputs for this day
+            const openingTimeInput = document.getElementById(`opening_hours-${day}-opening_time`);
+            const closingTimeInput = document.getElementById(`opening_hours-${day}-closing_time`);
+
+            // Initial state setup
+            function updateInputs() {
+                if (checkbox.checked) {
+                    openingTimeInput.disabled = true;
+                    closingTimeInput.disabled = true;
+                    openingTimeInput.removeAttribute('required');
+                    closingTimeInput.removeAttribute('required');
+                } else {
+                    openingTimeInput.disabled = false;
+                    closingTimeInput.disabled = false;
+                    openingTimeInput.setAttribute('required', 'required');
+                    closingTimeInput.setAttribute('required', 'required');
+                }
+            }
+
+            // Set initial state
+            updateInputs();
+
+            // Add change event listener
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Store the current values before clearing
+                    openingTimeInput.dataset.previousValue = openingTimeInput.value;
+                    closingTimeInput.dataset.previousValue = closingTimeInput.value;
+
+                    // Clear the values
+                    openingTimeInput.value = '';
+                    closingTimeInput.value = '';
+                } else {
+                    // Restore previous values if they exist
+                    if (openingTimeInput.dataset.previousValue) {
+                        openingTimeInput.value = openingTimeInput.dataset.previousValue;
+                    }
+                    if (closingTimeInput.dataset.previousValue) {
+                        closingTimeInput.value = closingTimeInput.dataset.previousValue;
+                    }
+                }
+                updateInputs();
+            });
+        });
+
+        // Form validation before submission
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            let hasError = false;
+            const errorMessages = [];
+
+            // Validate postcode
+            const postcodeInput = document.querySelector('input[name="postcode"]');
+            const postcodeValue = postcodeInput.value.trim();
+
+            if (postcodeValue) {
+                // Check if postcode is 4 digits
+                if (!/^\d{4}$/.test(postcodeValue)) {
+                    hasError = true;
+                    errorMessages.push('Postcode must be exactly 4 digits.');
+                }
+            }
+
+            // Validate opening hours
+            closedCheckboxes.forEach(function(checkbox) {
+                const day = checkbox.id.match(/opening_hours-(\w+)-is_closed/)[1];
+                const openingTimeInput = document.getElementById(`opening_hours-${day}-opening_time`);
+                const closingTimeInput = document.getElementById(`opening_hours-${day}-closing_time`);
+
+                if (!checkbox.checked) {
+                    // If not closed, both opening and closing times must be provided
+                    if (!openingTimeInput.value || !closingTimeInput.value) {
+                        hasError = true;
+                        errorMessages.push(`Please provide both opening and closing times for ${day} or mark as closed.`);
+                    }
+                }
+            });
+
+            if (hasError) {
+                e.preventDefault();
+                alert('Please correct the following errors:\n\n' + errorMessages.join('\n'));
+            }
+        });
+    });
+</script>
 
 {% endblock content %}

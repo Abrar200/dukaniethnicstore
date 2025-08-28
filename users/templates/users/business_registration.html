@@ -1,6 +1,6 @@
 {% extends "business/base.html" %}
 {% load static %}
-
+{% load static business_filters %}
 {% block slider %}
 <div class="breadcrumb-block style-shared">
     <div class="breadcrumb-main bg-linear overflow-hidden">
@@ -43,27 +43,28 @@
                     <strong>Warning:</strong> Your details will not be saved, unless you complete the FULL registration process, including finalizing your Stripe account. You may need your ID. Do not exit the page without completing your registration, otherwise, your details will not be saved.
                 </div>
 
-                <form class="md:mt-7 mt-4" action="{% url 'business_registration' %}" method="post" enctype="multipart/form-data">
+                <form class="md:mt-7 mt-4" action="{% url 'business_registration' %}" method="post">
                     {% csrf_token %}
 
                     <!-- User Registration Fields -->
                     <div class="heading6 mt-4">User Information</div>
 
                     <div class="email mt-5">
-                        <input name="first_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="First Name *" required />
+                        <input name="first_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="First Name *" value="{{ form_data.first_name }}" required />
                     </div>
                     <div class="email mt-5">
-                        <input name="last_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Last Name *" required />
+                        <input name="last_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Last Name *" value="{{ form_data.last_name }}" required />
                     </div>
                     <div class="email mt-5">
-                        <input name="username" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Username *" required />
+                        <input name="username" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Username *" value="{{ form_data.username }}" required />
+                        <small class="text-secondary mt-1 block">Usernames can only contain letters, numbers, underscores and periods.</small>
                     </div>
                     <div class="email mt-5">
-                        <input name="email" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="email" placeholder="Email Address *" required />
+                        <input name="email" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="email" placeholder="Email Address *" value="{{ form_data.email }}" required />
                     </div>
                     <div class="pass mt-5">
                         <input name="password" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="password" type="password" placeholder="Password *" required />
-                        <small class="text-secondary mt-2 block">Password must be at least 12 characters long, with an uppercase letter, a lowercase letter, a number, and a special character.</small>
+                        <small class="text-secondary mt-2 block">Password must be at least 12 characters long, with an uppercase letter, a lowercase letter, a number, and a special character (@$!%*#?&).</small>
                     </div>
                     <div class="confirm-pass mt-5">
                         <input name="confirm_password" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="confirm_password" type="password" placeholder="Confirm Password *" required />
@@ -73,76 +74,115 @@
                     <div class="heading6 mt-8">Business Information</div>
 
                     <div class="email mt-5">
-                        <input name="business_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Business Name *" required />
+                        <input name="business_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Business Name *" value="{{ form_data.business_name }}" required />
                     </div>
                     <div class="email mt-5">
-                        <input name="business_email" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="email" placeholder="Business Email *" required />
+                        <textarea name="description" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" placeholder="Description *" required>{{ form_data.description }}</textarea>
                     </div>
-                    <div class="email mt-5">
-                        <textarea name="description" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" placeholder="Description *" required></textarea>
+
+                    <!-- Business Type Selection -->
+                    <div class="col-span-full mt-5">
+                        <label class="block mb-2 font-semibold">Choose Business Type *</label>
+                        <div class="border border-line px-4 py-3 w-full rounded-lg">
+                            <div class="flex flex-col mb-3">
+                                <div class="flex items-center">
+                                    <input type="radio" id="product" name="business_type" value="product" {% if form_data.business_type == 'product' %}checked{% endif %} required>
+                                    <label for="product" class="ml-2">Product Business (A$12/month)</label>
+                                </div>
+                                <small class="text-secondary ml-6 mt-1">Only allows you to add and sell physical products on your storefront</small>
+                            </div>
+                            <div class="flex flex-col mb-3">
+                                <div class="flex items-center">
+                                    <input type="radio" id="service" name="business_type" value="service" {% if form_data.business_type == 'service' %}checked{% endif %}>
+                                    <label for="service" class="ml-2">Service Business (A$10/month)</label>
+                                </div>
+                                <small class="text-secondary ml-6 mt-1">Only allows you to add and offer services on your storefront</small>
+                            </div>
+                            <div class="flex flex-col">
+                                <div class="flex items-center">
+                                    <input type="radio" id="both" name="business_type" value="both" {% if form_data.business_type == 'both' %}checked{% endif %}>
+                                    <label for="both" class="ml-2">Both Product & Service Business (A$20/month)</label>
+                                </div>
+                                <small class="text-secondary ml-6 mt-1">Allows you to add and sell both products and services on your storefront</small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-span-full select-block mt-5">
-                        <select class="border border-line px-4 py-3 w-full rounded-lg" name="business_type" required>
-                            <option value="" disabled selected>Choose Business Type *</option>
-                            <option value="product">Product Business</option>
-                            <option value="service">Service Business</option>
-                        </select>
-                    </div>
+
+                    <!-- Countries Selection -->
                     <div class="col-span-full select-block mt-5">
                         <label for="countries">Choose Country/Region(s) *</label>
                         <select class="border border-line px-4 py-3 w-full rounded-lg" id="countries" name="countries[]" multiple required>
                             {% for country in countries %}
-                            <option value="{{ country.id }}">{{ country.name }}</option>
+                                <option value="{{ country.id }}" {% if country.id|stringformat:"i" in form_data.country_ids %}selected{% endif %}>{{ country.name }}</option>
                             {% endfor %}
                         </select>
+                        <small class="text-secondary mt-1 block">What region or culture best represents your business products?</small>
                     </div>
+
+                    <!-- States Selection -->
                     <div class="col-span-full select-block mt-5">
                         <label for="states">Choose State(s) *</label>
                         <select class="border border-line px-4 py-3 w-full rounded-lg" id="states" name="states[]" multiple required>
                             {% for state in states %}
-                            <option value="{{ state.id }}">{{ state.name }}</option>
+                                <option value="{{ state.id }}" {% if state.id|stringformat:"i" in form_data.state_ids %}selected{% endif %}>{{ state.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
+
                     <div class="email mt-5">
-                        <input name="address" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Address *" required />
+                        <input name="address" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Address *" value="{{ form_data.address }}" required />
+                    </div>
+
+                    <!-- Added Postcode Field -->
+                    <div class="email mt-5">
+                        <input name="postcode" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Postcode *" value="{{ form_data.postcode }}" maxlength="4" pattern="[0-9]{4}" title="Please enter a 4-digit Australian postcode" required />
+                        <small class="text-secondary mt-1 block">4-digit Australian postcode</small>
+                    </div>
+
+                    <div class="email mt-5">
+                        <input name="phone" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Phone Number *" value="{{ form_data.phone }}" required />
                     </div>
                     <div class="email mt-5">
-                        <input name="phone" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Phone Number *" required />
-                    </div>
-                    <div class="email mt-5">
-                        <input name="website" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="url" placeholder="Website (optional)" />
-                    </div>
-                    <div class="email mt-5">
-                        <label>Profile Picture</label>
-                        <input name="profile_picture" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="file" accept="image/*" />
-                    </div>
-                    <div class="email mt-5">
-                        <label>Banner Image</label>
-                        <input name="banner_image" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="file" accept="image/*" />
+                        <input name="website" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="url" placeholder="Website (optional)" value="{{ form_data.website }}" />
                     </div>
 
                     <!-- Opening Hours -->
                     <div class="opening-hours mt-5">
                         <h3 class="text-lg font-semibold mb-3">Opening Hours *</h3>
+                        <div class="alert alert-info mb-4">
+                            <strong>Important:</strong> For each day, you must either mark it as "Closed" OR provide both opening and closing times. Both fields are required if the day is not marked as closed.
+                        </div>
                         <div class="grid grid-cols-1 gap-4">
                             {% for day in day_choices %}
                             <div class="flex flex-col">
-                                <label class="mr-2">{{ day.1 }}</label>
+                                <label class="mr-2 font-medium">{{ day.1 }}</label>
                                 <div class="flex items-center">
-                                    <input type="time" name="opening_hours-{{ day.0 }}-opening_time" id="opening_hours-{{ day.0 }}-opening_time" class="border-line px-4 py-2 rounded-lg" placeholder="Opening Time"> 
+                                    <input type="time"
+                                           name="opening_hours-{{ day.0 }}-opening_time"
+                                           id="opening_hours-{{ day.0 }}-opening_time"
+                                           class="border-line px-4 py-2 rounded-lg"
+                                           placeholder="Opening Time"
+                                           value="{% if form_data.opening_hours %}{{ form_data.opening_hours|get_item:day.0|get_item:'opening_time' }}{% endif %}">
                                     <span class="mx-2">-</span>
-                                    <input type="time" name="opening_hours-{{ day.0 }}-closing_time" id="opening_hours-{{ day.0 }}-closing_time" class="border-line px-4 py-2 rounded-lg" placeholder="Closing Time">
+                                    <input type="time"
+                                           name="opening_hours-{{ day.0 }}-closing_time"
+                                           id="opening_hours-{{ day.0 }}-closing_time"
+                                           class="border-line px-4 py-2 rounded-lg"
+                                           placeholder="Closing Time"
+                                           value="{% if form_data.opening_hours %}{{ form_data.opening_hours|get_item:day.0|get_item:'closing_time' }}{% endif %}">
                                 </div>
                                 <div class="flex items-center mt-2">
-                                    <input type="checkbox" name="opening_hours-{{ day.0 }}-is_closed" id="opening_hours-{{ day.0 }}-is_closed" class="mr-2">
-                                    <label for="opening_hours-{{ day.0 }}-is_closed" class="mr-2">(Closed)</label>
+                                    <input type="checkbox"
+                                           name="opening_hours-{{ day.0 }}-is_closed"
+                                           id="opening_hours-{{ day.0 }}-is_closed"
+                                           class="mr-2"
+                                           {% if form_data.opening_hours and form_data.opening_hours|get_item:day.0|get_item:'is_closed' %}checked{% endif %}>
+                                    <label for="opening_hours-{{ day.0 }}-is_closed" class="mr-2">Closed this day</label>
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
                     </div>
-
 
                     <div class="block-button md:mt-7 mt-4">
                         <button class="button-main">Register Business</button>
@@ -163,5 +203,112 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Add this to your page's JavaScript or include it in a <script> tag
+
+    // Function to handle the opening hours "Closed" checkbox behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all "Closed" checkboxes
+        const closedCheckboxes = document.querySelectorAll('[id$="-is_closed"]');
+
+        // Add event listeners to each checkbox
+        closedCheckboxes.forEach(function(checkbox) {
+            // Get the day from the checkbox id
+            const day = checkbox.id.match(/opening_hours-(\w+)-is_closed/)[1];
+
+            // Get the opening and closing time inputs for this day
+            const openingTimeInput = document.getElementById(`opening_hours-${day}-opening_time`);
+            const closingTimeInput = document.getElementById(`opening_hours-${day}-closing_time`);
+
+            // Initial state setup
+            if (checkbox.checked) {
+                openingTimeInput.disabled = true;
+                closingTimeInput.disabled = true;
+                openingTimeInput.removeAttribute('required');
+                closingTimeInput.removeAttribute('required');
+            } else {
+                openingTimeInput.setAttribute('required', 'required');
+                closingTimeInput.setAttribute('required', 'required');
+            }
+
+            // Add change event listener
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // If "Closed" is checked, disable the time inputs and remove required attribute
+                    openingTimeInput.disabled = true;
+                    closingTimeInput.disabled = true;
+                    openingTimeInput.removeAttribute('required');
+                    closingTimeInput.removeAttribute('required');
+
+                    // Store the current values before clearing
+                    openingTimeInput.dataset.previousValue = openingTimeInput.value;
+                    closingTimeInput.dataset.previousValue = closingTimeInput.value;
+
+                    // Clear the values
+                    openingTimeInput.value = '';
+                    closingTimeInput.value = '';
+                } else {
+                    // If "Closed" is unchecked, enable the time inputs and make them required
+                    openingTimeInput.disabled = false;
+                    closingTimeInput.disabled = false;
+                    openingTimeInput.setAttribute('required', 'required');
+                    closingTimeInput.setAttribute('required', 'required');
+
+                    // Restore previous values if they exist
+                    if (openingTimeInput.dataset.previousValue) {
+                        openingTimeInput.value = openingTimeInput.dataset.previousValue;
+                    }
+                    if (closingTimeInput.dataset.previousValue) {
+                        closingTimeInput.value = closingTimeInput.dataset.previousValue;
+                    }
+                }
+            });
+
+            // Trigger the change event to set the initial state
+            checkbox.dispatchEvent(new Event('change'));
+        });
+
+        // Form validation before submission
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            let hasError = false;
+            const errorMessages = [];
+
+            // Validate postcode
+            const postcodeInput = document.querySelector('input[name="postcode"]');
+            const postcodeValue = postcodeInput.value.trim();
+
+            if (postcodeValue) {
+                // Check if postcode is 4 digits
+                if (!/^\d{4}$/.test(postcodeValue)) {
+                    hasError = true;
+                    errorMessages.push('Postcode must be exactly 4 digits.');
+                }
+            }
+
+            // Validate opening hours
+            closedCheckboxes.forEach(function(checkbox) {
+                const day = checkbox.id.match(/opening_hours-(\w+)-is_closed/)[1];
+                const openingTimeInput = document.getElementById(`opening_hours-${day}-opening_time`);
+                const closingTimeInput = document.getElementById(`opening_hours-${day}-closing_time`);
+                const dayLabel = document.querySelector(`label[for="opening_hours-${day}-is_closed"]`).parentElement.parentElement.querySelector('label').textContent;
+
+                if (!checkbox.checked) {
+                    // If not closed, both opening and closing times must be provided
+                    if (!openingTimeInput.value || !closingTimeInput.value) {
+                        hasError = true;
+                        errorMessages.push(`${dayLabel}: Please provide both opening and closing times or mark as closed.`);
+                    }
+                }
+            });
+
+            if (hasError) {
+                e.preventDefault();
+                alert('Please correct the following errors:\n\n' + errorMessages.join('\n'));
+            }
+        });
+    });
+</script>
 
 {% endblock content %}

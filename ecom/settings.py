@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-9%kas3mq31%5q6)o#gm_ka%6e465_x_3(d0@6dn%@f_4k)vu5y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 LOGGING = {
@@ -47,6 +47,16 @@ LOGGING = {
 }
 
 
+# DoorDash Drive API Configuration
+DOORDASH_DEVELOPER_ID = '811c829f-1159-4a96-b927-112a6ccc5e8e'  # From your screenshot
+DOORDASH_KEY_ID = 'a76ac2a7-09df-4635-a5cb-86f3edbf3a06'  # From your screenshot
+DOORDASH_SIGNING_SECRET = 'OoAaVZ-ij_r4c0kM0kJTg7qOB7fP8MzPq7jyhZ6oIU'  # From your screenshot
+DOORDASH_BASE_URL = 'https://openapi.doordash.com/drive/v2'  # Sandbox URL
+
+# Google Maps API Configuration
+GOOGLE_MAPS_API_KEY = 'AIzaSyD_jODWQ-KDeU65Sr4xOALQsZ7mwI3q7h4'
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -59,7 +69,6 @@ INSTALLED_APPS = [
     'business.apps.BusinessConfig',
     'users.apps.UsersConfig',
     'bootstrap5',
-    'pyspark',
 ]
 
 MIDDLEWARE = [
@@ -133,10 +142,10 @@ AUTH_PASSWORD_VALIDATORS = [
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp-mail.outlook.com'
-EMAIL_HOST_USER = "dukaniethnicstore@outlook.com"
-EMAIL_HOST_PASSWORD = "dukaniemail123)"
-DEFAULT_FROM_EMAIL = "dukaniethnicstore@outlook.com"
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = "dukaniethnicstore@gmail.com"
+EMAIL_HOST_PASSWORD = "cquh pjqh hlyi cafy"
+DEFAULT_FROM_EMAIL = "dukaniethnicstore@gmail.com"
 
 
 # Internationalization
@@ -154,9 +163,20 @@ USE_TZ = True
 
 
 # Stripe settings
-STRIPE_SECRET_KEY = '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'
-STRIPE_PUBLIC_KEY = 'pk_live_51PVl0mRvafFWMAqoRdQSQ6c7bjc4ygSkDWh7fMGk9iiT9xQKw0tbaiKy6QTQvllVMc8E471xMA4O4qhTQXuNmi3X00siAayXXj'
+#STRIPE_SECRET_KEY = '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'
+#STRIPE_PUBLIC_KEY = 'pk_live_51PVl0mRvafFWMAqoRdQSQ6c7bjc4ygSkDWh7fMGk9iiT9xQKw0tbaiKy6QTQvllVMc8E471xMA4O4qhTQXuNmi3X00siAayXXj'
 
+
+STRIPE_SECRET_KEY = 'sk_test_51P4gElP9SsicgG1jiHrOYu86MB4PNBRKMTxSgCHrCpPGaWrs68tkgtsUMx8CBZ7Nv0BXd9nFMAyuia4mSEo60Tdj00iH6Li1dk'
+STRIPE_PUBLIC_KEY = 'pk_test_51P4gElP9SsicgG1jB3b9vewTDC2pbRh3YOUKAaavO88BIFyqQgIg3FJzmy9NDwitrtwS8BXHUYhG2R2WtuuqfLFw00ZdmOuvHt'
+STRIPE_PRODUCT_BUSINESS_PRICE_ID = 'price_1RHUo2P9SsicgG1jYieDVTOO'  # A$12/month with 3-month free trial
+STRIPE_SERVICE_BUSINESS_PRICE_ID = 'price_1RHUovP9SsicgG1jY0FLVRg1'  # A$10/month with 3-month free trial
+STRIPE_BOTH_BUSINESS_PRICE_ID = 'price_1RHUpcP9SsicgG1jFQtfzR1C'     # A$20/month with 3-month free trial
+
+
+SHIPPIT_API_KEY = '9DKhF5UavAlLZioVVJxUsA'  # Your Shippit API key
+SHIPPIT_API_URL = 'https://app.shippit.com/api/3'  # Shippit API endpoint
+SHIPPIT_ENVIRONMENT = 'sandbox'  # or 'production' for production
 
 
 LOGIN_URL = '/login/'

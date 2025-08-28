@@ -2,7 +2,716 @@
 
 {% load static %}
 
-{% block slider %}
+{% block content %}
+
+<!-- Isolated Checkout Styles -->
+<style>
+/* Namespace all checkout styles to avoid conflicts */
+.dukani-checkout {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #1f2937;
+    background-color: #f9fafb;
+    min-height: 100vh;
+    padding: 3rem 0;
+}
+
+.dukani-checkout * {
+    box-sizing: border-box;
+}
+
+.dukani-checkout .dc-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.dukani-checkout .dc-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .dukani-checkout .dc-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+.dukani-checkout .dc-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+.dukani-checkout .dc-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.dukani-checkout .dc-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 20px;
+}
+
+.dukani-checkout .dc-icon-blue { background-color: #dbeafe; color: #2563eb; }
+.dukani-checkout .dc-icon-green { background-color: #d1fae5; color: #059669; }
+.dukani-checkout .dc-icon-purple { background-color: #ede9fe; color: #7c3aed; }
+.dukani-checkout .dc-icon-indigo { background-color: #e0e7ff; color: #4f46e5; }
+
+.dukani-checkout .dc-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.dukani-checkout .dc-delivery-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .dukani-checkout .dc-delivery-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dukani-checkout .dc-delivery-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.dukani-checkout .dc-delivery-card {
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.dukani-checkout .dc-delivery-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.dukani-checkout .dc-delivery-option input:checked + .dc-delivery-card {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dukani-checkout .dc-delivery-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.dukani-checkout .dc-delivery-info {
+    display: flex;
+    align-items: center;
+}
+
+.dukani-checkout .dc-delivery-icon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+    color: #374151;
+}
+
+.dukani-checkout .dc-delivery-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.dukani-checkout .dc-radio-indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.dukani-checkout .dc-delivery-option input:checked + .dc-delivery-card .dc-radio-indicator {
+    border-color: #3b82f6;
+}
+
+.dukani-checkout .dc-radio-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #3b82f6;
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.2s ease;
+}
+
+.dukani-checkout .dc-delivery-option input:checked + .dc-delivery-card .dc-radio-dot {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.dukani-checkout .dc-delivery-desc {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+.dukani-checkout .dc-delivery-price {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.dukani-checkout .dc-price-free { color: #059669; }
+.dukani-checkout .dc-price-paid { color: #2563eb; }
+
+.dukani-checkout .dc-form-group {
+    margin-bottom: 1rem;
+}
+
+.dukani-checkout .dc-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.dukani-checkout .dc-input,
+.dukani-checkout .dc-select,
+.dukani-checkout .dc-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.dukani-checkout .dc-input:focus,
+.dukani-checkout .dc-select:focus,
+.dukani-checkout .dc-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dukani-checkout .dc-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .dukani-checkout .dc-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dukani-checkout .dc-button {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.dukani-checkout .dc-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dukani-checkout .dc-button-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.dukani-checkout .dc-button-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+}
+
+.dukani-checkout .dc-button-large {
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    background: linear-gradient(135deg, #3b82f6, #7c3aed);
+}
+
+.dukani-checkout .dc-button-large:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb, #6d28d9);
+    transform: translateY(-2px);
+}
+
+.dukani-checkout .dc-status {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.dukani-checkout .dc-status-loading { color: #2563eb; }
+.dukani-checkout .dc-status-success { color: #059669; }
+.dukani-checkout .dc-status-error { color: #dc2626; }
+
+.dukani-checkout .dc-quote-display {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.dukani-checkout .dc-quote-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.dukani-checkout .dc-quote-icon {
+    width: 32px;
+    height: 32px;
+    background-color: #d1fae5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    color: #059669;
+}
+
+.dukani-checkout .dc-quote-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #065f46;
+}
+
+.dukani-checkout .dc-quote-breakdown {
+    margin-bottom: 1rem;
+}
+
+.dukani-checkout .dc-quote-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+.dukani-checkout .dc-quote-business {
+    display: flex;
+    align-items: center;
+}
+
+.dukani-checkout .dc-quote-business-icon {
+    color: #059669;
+    font-size: 1.125rem;
+    margin-right: 0.75rem;
+}
+
+.dukani-checkout .dc-quote-business-info h4 {
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.25rem 0;
+}
+
+.dukani-checkout .dc-quote-business-info p {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.dukani-checkout .dc-quote-price {
+    text-align: right;
+}
+
+.dukani-checkout .dc-quote-price-amount {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #065f46;
+}
+
+.dukani-checkout .dc-quote-price-time {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.dukani-checkout .dc-quote-total {
+    border-top: 1px solid #a7f3d0;
+    padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dukani-checkout .dc-quote-total-label {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #065f46;
+}
+
+.dukani-checkout .dc-quote-total-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #065f46;
+}
+
+.dukani-checkout .dc-tip-section {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #93c5fd;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.dukani-checkout .dc-tip-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.dukani-checkout .dc-tip-heart {
+    color: #ef4444;
+    margin-right: 0.5rem;
+}
+
+.dukani-checkout .dc-tip-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.dukani-checkout .dc-tip-option {
+    border: 2px solid #d1d5db;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: white;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.dukani-checkout .dc-tip-option:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.dukani-checkout .dc-tip-option.selected {
+    border-color: #3b82f6;
+    background-color: #3b82f6;
+    color: white;
+}
+
+.dukani-checkout .dc-tip-custom {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.dukani-checkout .dc-tip-custom-input {
+    width: 80px;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.dukani-checkout .dc-tip-display {
+    background: white;
+    border: 1px solid #93c5fd;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.dukani-checkout .dc-tip-current {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.dukani-checkout .dc-tip-current-amount {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.dukani-checkout .dc-tip-note {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.dukani-checkout .dc-order-summary {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    position: sticky;
+    top: 2rem;
+}
+
+.dukani-checkout .dc-summary-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    color: #111827;
+}
+
+.dukani-checkout .dc-summary-icon {
+    color: #2563eb;
+    margin-right: 0.5rem;
+}
+
+.dukani-checkout .dc-order-items {
+    margin-bottom: 1.5rem;
+}
+
+.dukani-checkout .dc-order-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.dukani-checkout .dc-item-image {
+    width: 64px;
+    height: 64px;
+    background: #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.dukani-checkout .dc-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dukani-checkout .dc-item-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.dukani-checkout .dc-item-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+.dukani-checkout .dc-item-variations {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.dukani-checkout .dc-item-quantity {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dukani-checkout .dc-item-qty {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.dukani-checkout .dc-item-price {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.dukani-checkout .dc-calculations {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1rem;
+}
+
+.dukani-checkout .dc-calc-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.dukani-checkout .dc-calc-label {
+    color: #6b7280;
+}
+
+.dukani-checkout .dc-calc-amount {
+    font-weight: 600;
+}
+
+.dukani-checkout .dc-calc-total {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dukani-checkout .dc-total-label {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dukani-checkout .dc-total-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.dukani-checkout .dc-delivery-info {
+    margin-top: 1.5rem;
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.dukani-checkout .dc-delivery-info-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.dukani-checkout .dc-delivery-info-icon {
+    color: #2563eb;
+    margin-right: 0.5rem;
+}
+
+.dukani-checkout .dc-delivery-info-title {
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.dukani-checkout .dc-delivery-info-list {
+    font-size: 0.875rem;
+    color: #1e40af;
+}
+
+.dukani-checkout .dc-delivery-info-list div {
+    margin-bottom: 0.25rem;
+}
+
+.dukani-checkout .dc-security {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.dukani-checkout .dc-security-text {
+    font-size: 0.75rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dukani-checkout .dc-security-icon {
+    color: #059669;
+    margin-right: 0.25rem;
+}
+
+.dukani-checkout .dc-hidden {
+    display: none;
+}
+
+.dukani-checkout .dc-loading {
+    opacity: 0.7;
+}
+
+.dukani-checkout .dc-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.dukani-checkout .dc-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dukani-checkout {
+        padding: 1.5rem 0;
+    }
+
+    .dukani-checkout .dc-card {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .dukani-checkout .dc-order-summary {
+        position: static;
+        margin-top: 0;
+    }
+
+    .dukani-checkout .dc-tip-options {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+{% if messages %}
+    <div class="dukani-checkout">
+        <div class="dc-container">
+            {% for message in messages %}
+                <div class="dc-card" style="background: #fef2f2; border-color: #fecaca; color: #991b1b; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center;">
+                        <i class="ph ph-warning-circle" style="margin-right: 0.5rem;"></i>
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
 
 <div class="breadcrumb-block style-shared">
     <div class="breadcrumb-main bg-linear overflow-hidden">
@@ -21,99 +730,364 @@
     </div>
 </div>
 
-{% endblock slider %}
+<div class="dukani-checkout">
+    <div class="dc-container">
+        <div class="dc-grid">
+            <!-- Left Column - Main Form -->
+            <div>
+                <form id="checkout-form" method="post">
+                    {% csrf_token %}
 
-{% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-
-{% block content %}
-
-<script src="https://js.stripe.com/v3/"></script>
-
-<div class="checkout-block md:py-20 py-10">
-    <div class="container">
-        <div class="content-main flex justify-between">
-            <div class="left w-1/2">
-                <div class="form-login-block mt-3">
-                </div>
-                <div class="information mt-5">
-                    <div class="heading5">Information</div>
-                    <div class="form-checkout mt-5">
-                        <form id="checkout-form">
-                            {% csrf_token %}
-                            <div class="grid sm:grid-cols-2 gap-5">
-                                <div class="email ">
-                                    <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="address" name="address" type="text" placeholder="Address *" required />
-                                </div>
-                                <div class="email ">
-                                    <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="city" name="city" type="text" placeholder="City *" required />
-                                </div>
-                                <div class="email ">
-                                    <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="state" name="state" type="text" placeholder="State *" required />
-                                </div>
-                                <div class="email ">
-                                    <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="postal_code" name="postal_code" type="text" placeholder="Postal Code *" required />
-                                </div>
-                                <div class="col-span-full">
-                                    <textarea class="border border-line px-4 py-3 w-full rounded-lg" id="note" name="note" placeholder="Write note..."></textarea>
-                                </div>
+                    <!-- Delivery Method Card -->
+                    <div class="dc-card">
+                        <div class="dc-card-header">
+                            <div class="dc-icon-wrapper dc-icon-blue">
+                                <i class="ph ph-truck"></i>
                             </div>
-                            <div class="payment-block md:mt-10 mt-6">
-                                <div class="heading5">Choose payment Option:</div>
-                                <div class="list-payment mt-5">
-                                    <div class='type bg-surface p-5 border border-line rounded-lg' id="creditCardForm">
-                                        <input class="cursor-pointer" type="radio" id="credit" name="payment" />
-                                        <label class="text-button pl-2 cursor-pointer" for="credit">Credit Card</label>
-                                        <div class="infor">
-                                            <!-- Credit Card Info Fields -->
+                            <h3 class="dc-title">Delivery Method</h3>
+                        </div>
+
+                        <div class="dc-delivery-options">
+                            <label class="dc-delivery-option">
+                                <input type="radio" name="delivery_method" value="pickup" checked style="display: none;">
+                                <div class="dc-delivery-card">
+                                    <div class="dc-delivery-header">
+                                        <div class="dc-delivery-info">
+                                            <i class="ph ph-storefront dc-delivery-icon"></i>
+                                            <span class="dc-delivery-name">Pickup</span>
+                                        </div>
+                                        <div class="dc-radio-indicator">
+                                            <div class="dc-radio-dot"></div>
                                         </div>
                                     </div>
+                                    <p class="dc-delivery-desc">Collect your order directly from the business location at your convenience.</p>
+                                    <div class="dc-delivery-price dc-price-free">Free</div>
                                 </div>
-                            </div>
-                            <div class="block-button md:mt-10 mt-6">
-                                <button type="button" id="checkout-button" class="button-main w-full bg-black text-white whitespace-nowrap">Make Payment</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="right w-5/12">
-                <div class="checkout-block">
-                    <div class="heading5 pb-3">Your Order</div>
-                    <div class="list-product-checkout">
-                        {% for item in cart_items %}
-                        <div class="item flex items-center justify-between w-full pb-5 border-b border-line gap-6 mt-5">
-                            <div style="height: 120px" class="bg-img w-[100px] aspect-square flex-shrink-0 rounded-lg overflow-hidden">
-                                <img src="{{ item.product.image.url }}" alt="img" class="w-full h-full">
-                            </div>
-                            <div class="flex items-center justify-between w-full">
-                                <div>
-                                    <div class="name text-title">{{ item.product.name }}</div>
-                                    <div class="caption1 text-secondary mt-2">
-                                        <span class="size capitalize">XS</span>
-                                        <span>/</span>
-                                        <span class="color capitalize">white</span>
+                            </label>
+
+                            <label class="dc-delivery-option">
+                                <input type="radio" name="delivery_method" value="delivery" style="display: none;">
+                                <div class="dc-delivery-card">
+                                    <div class="dc-delivery-header">
+                                        <div class="dc-delivery-info">
+                                            <i class="ph ph-motorcycle dc-delivery-icon"></i>
+                                            <span class="dc-delivery-name">Delivery</span>
+                                        </div>
+                                        <div class="dc-radio-indicator">
+                                            <div class="dc-radio-dot"></div>
+                                        </div>
                                     </div>
+                                    <p class="dc-delivery-desc">Professional delivery service with real-time tracking via Shippit network.</p>
+                                    <div class="dc-delivery-price dc-price-paid">From $6.50</div>
                                 </div>
-                                <div class="text-title">
-                                    <span class="quantity">{{ item.quantity }}</span>
-                                    <span class="px-1">x</span>
-                                    <span>${{ item.product.price }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address Card -->
+                    <div id="address-section" class="dc-card dc-hidden">
+                        <div class="dc-card-header">
+                            <div class="dc-icon-wrapper dc-icon-green">
+                                <i class="ph ph-map-pin"></i>
+                            </div>
+                            <h3 class="dc-title">Delivery Address</h3>
+                        </div>
+
+                        <div class="dc-form-group">
+                            <label class="dc-label">Street Address</label>
+                            <input
+                                class="dc-input"
+                                id="delivery-address"
+                                name="address"
+                                type="text"
+                                placeholder="123 Main Street, Unit 4"
+                                required
+                            />
+                        </div>
+
+                        <div class="dc-form-row">
+                            <div class="dc-form-group">
+                                <label class="dc-label">City</label>
+                                <select class="dc-select" id="delivery-city" name="city" required>
+                                    <option value="">Select City</option>
+                                    <option value="Adelaide">Adelaide</option>
+                                    <option value="Melbourne">Melbourne</option>
+                                    <option value="Sydney">Sydney</option>
+                                    <option value="Brisbane">Brisbane</option>
+                                    <option value="Perth">Perth</option>
+                                    <option value="Darwin">Darwin</option>
+                                    <option value="Hobart">Hobart</option>
+                                    <option value="Canberra">Canberra</option>
+                                    <option value="Gold Coast">Gold Coast</option>
+                                    <option value="Newcastle">Newcastle</option>
+                                    <option value="Wollongong">Wollongong</option>
+                                    <option value="Geelong">Geelong</option>
+                                    <option value="Townsville">Townsville</option>
+                                    <option value="Cairns">Cairns</option>
+                                    <option value="Toowoomba">Toowoomba</option>
+                                    <option value="Ballarat">Ballarat</option>
+                                    <option value="Bendigo">Bendigo</option>
+                                    <option value="Albury">Albury</option>
+                                    <option value="Launceston">Launceston</option>
+                                    <option value="Mackay">Mackay</option>
+                                </select>
+                            </div>
+
+                            <div class="dc-form-group">
+                                <label class="dc-label">State</label>
+                                <select class="dc-select" id="delivery-state" name="state" required>
+                                    <option value="">Select State</option>
+                                    <option value="NSW">New South Wales</option>
+                                    <option value="VIC">Victoria</option>
+                                    <option value="QLD">Queensland</option>
+                                    <option value="SA">South Australia</option>
+                                    <option value="WA">Western Australia</option>
+                                    <option value="TAS">Tasmania</option>
+                                    <option value="NT">Northern Territory</option>
+                                    <option value="ACT">Australian Capital Territory</option>
+                                </select>
+                            </div>
+
+                            <div class="dc-form-group">
+                                <label class="dc-label">Postcode</label>
+                                <input
+                                    class="dc-input"
+                                    id="delivery-postal"
+                                    name="postal_code"
+                                    type="text"
+                                    placeholder="5000"
+                                    pattern="[0-9]{4}"
+                                    maxlength="4"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Address Validation -->
+                        <div id="address-validation" class="dc-hidden" style="background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                            <div style="display: flex; align-items: start;">
+                                <i class="ph ph-warning-circle" style="color: #d97706; margin-right: 0.75rem; margin-top: 0.125rem;"></i>
+                                <div>
+                                    <p style="font-size: 0.875rem; font-weight: 500; color: #92400e; margin: 0 0 0.25rem 0;">Please verify your address</p>
+                                    <p style="font-size: 0.875rem; color: #92400e; margin: 0;" id="formatted-address"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quote Button -->
+                        <div style="margin-top: 1.5rem;">
+                            <button
+                                type="button"
+                                id="quote-delivery-btn"
+                                class="dc-button dc-button-primary"
+                                disabled
+                            >
+                                <i class="ph ph-calculator" style="margin-right: 0.5rem;"></i>
+                                Get Delivery Quote
+                            </button>
+                            <div id="quote-status" class="dc-status"></div>
+                        </div>
+
+                        <!-- Quote Results -->
+                        <div id="quote-display" class="dc-hidden">
+                            <div class="dc-quote-display dc-fade-in">
+                                <div class="dc-quote-header">
+                                    <div class="dc-quote-icon">
+                                        <i class="ph ph-check-circle"></i>
+                                    </div>
+                                    <h4 class="dc-quote-title">Delivery Available!</h4>
+                                </div>
+
+                                <div id="quote-breakdown" class="dc-quote-breakdown"></div>
+
+                                <div class="dc-quote-total">
+                                    <span class="dc-quote-total-label">Total Delivery Fee:</span>
+                                    <span id="quote-total" class="dc-quote-total-amount"></span>
+                                </div>
+
+                                <p style="margin-top: 0.75rem; font-size: 0.875rem; color: #059669; display: flex; align-items: center;">
+                                    <i class="ph ph-info" style="margin-right: 0.25rem;"></i>
+                                    Estimated delivery time provided after order confirmation
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Tip Section -->
+                        <div id="tip-selection" class="dc-hidden">
+                            <div class="dc-tip-section dc-fade-in">
+                                <h4 class="dc-tip-title">
+                                    <i class="ph ph-heart dc-tip-heart"></i>
+                                    Add a tip for your driver (optional)
+                                </h4>
+
+                                <div class="dc-tip-options">
+                                    <button type="button" class="dc-tip-option" data-amount="3">$3</button>
+                                    <button type="button" class="dc-tip-option" data-amount="5">$5</button>
+                                    <button type="button" class="dc-tip-option" data-amount="8">$8</button>
+                                </div>
+
+                                <div class="dc-tip-custom">
+                                    <span style="font-size: 0.875rem; font-weight: 500; color: #374151;">Custom amount:</span>
+                                    <span style="color: #6b7280;">$</span>
+                                    <input
+                                        type="number"
+                                        id="custom-tip-amount"
+                                        class="dc-tip-custom-input"
+                                        min="0"
+                                        step="0.50"
+                                        placeholder="0.00"
+                                    >
+                                </div>
+
+                                <div class="dc-tip-display">
+                                    <div class="dc-tip-current">
+                                        <span style="font-size: 0.875rem; font-weight: 500; color: #374151;">Selected tip:</span>
+                                        <span class="dc-tip-current-amount">$<span id="current-tip">0.00</span></span>
+                                    </div>
+                                    <p class="dc-tip-note">100% of tips go directly to your driver</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Notes Card -->
+                    <div class="dc-card">
+                        <div class="dc-card-header">
+                            <div class="dc-icon-wrapper dc-icon-purple">
+                                <i class="ph ph-note"></i>
+                            </div>
+                            <h3 class="dc-title">Order Notes</h3>
+                        </div>
+                        <textarea
+                            class="dc-textarea"
+                            id="order-notes"
+                            name="note"
+                            rows="3"
+                            placeholder="Special instructions for pickup or delivery..."
+                        ></textarea>
+                    </div>
+
+                    <!-- Payment Method Card -->
+                    <div class="dc-card">
+                        <div class="dc-card-header">
+                            <div class="dc-icon-wrapper dc-icon-indigo">
+                                <i class="ph ph-credit-card"></i>
+                            </div>
+                            <h3 class="dc-title">Payment Method</h3>
+                        </div>
+
+                        <div style="border: 2px solid #d1d5db; border-radius: 12px; padding: 1rem; background: white; transition: all 0.2s ease;">
+                            <div style="display: flex; align-items: center;">
+                                <input style="margin-right: 1rem; width: 16px; height: 16px;" type="radio" id="card-payment" name="payment" checked />
+                                <div style="flex: 1;">
+                                    <label style="font-size: 1.125rem; font-weight: 600; color: #111827; cursor: pointer;" for="card-payment">Credit/Debit Card</label>
+                                    <p style="font-size: 0.875rem; color: #6b7280; margin: 0.25rem 0 0 0;">Secure payment processing via Stripe</p>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzMiAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjIwIiByeD0iNCIgZmlsbD0iIzAwNTFBNSIvPgo8cGF0aCBkPSJNMTMuOTEgMTMuNzJMMTQuNTcgOS4wMkgxNi4yN0wxNS42MSAxMy43MkgxMy45MVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMC45IDkuMDJIMTkuMzhDMTguOTMgOS4wMiAxOC41OSA5LjE3IDE4LjM4IDkuNTdMMTUuNjEgMTMuNzJIMTcuNTVMMTcuOTUgMTIuNzRIMjAuMzJMMjAuNTMgMTMuNzJIMjIuMjNMMjAuOSA5LjAyWk0xOC42NCAxMS4zMUwxOS4zNiAxMC4wM0wxOS42NCAxMS4zMUgxOC42NFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=" alt="Visa" style="height: 20px;" />
+                                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzMiAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjIwIiByeD0iNCIgZmlsbD0iI0VCMDAxQiIvPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjEwIiByPSI2IiBmaWxsPSIjRkY1RjAwIi8+CjxjaXJjbGUgY3g9IjIwIiBjeT0iMTAiIHI9IjYiIGZpbGw9IiNGRkY1RjAiLz4KPC9zdmc+" alt="Mastercard" style="height: 20px;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Column - Order Summary -->
+            <div>
+                <div class="dc-order-summary">
+                    <h3 class="dc-summary-title">
+                        <i class="ph ph-shopping-cart dc-summary-icon"></i>
+                        Order Summary
+                    </h3>
+
+                    <!-- Order Items -->
+                    <div class="dc-order-items">
+                        {% for item in cart_items %}
+                        <div class="dc-order-item">
+                            <div class="dc-item-image">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            </div>
+                            <div class="dc-item-details">
+                                <h4 class="dc-item-name">{{ item.product.name }}</h4>
+                                <div class="dc-item-variations">
+                                    {% for variation in item.variations.all %}
+                                        <span>{{ variation.product_variation.variation.name }}: {{ variation.product_variation.value }}</span>
+                                        {% if not forloop.last %} • {% endif %}
+                                    {% endfor %}
+                                    {% if not item.variations.all %}
+                                        <span style="color: #9ca3af;">Standard</span>
+                                    {% endif %}
+                                </div>
+                                <div class="dc-item-quantity">
+                                    <span class="dc-item-qty">Qty: {{ item.quantity }}</span>
+                                    <span class="dc-item-price">${{ item.product.price }}</span>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
-                    <div class="total-cart-block pt-5 flex justify-between">
-                        <div class="heading5">Total</div>
-                        <div class="heading5 total-cart">${{ total_price }}</div>
+
+                    <!-- Order Calculations -->
+                    <div class="dc-calculations">
+                        <div class="dc-calc-line">
+                            <span class="dc-calc-label">Subtotal</span>
+                            <span class="dc-calc-amount" id="order-subtotal">${{ total_price }}</span>
+                        </div>
+
+                        <div id="delivery-cost-line" class="dc-calc-line dc-hidden">
+                            <span class="dc-calc-label">Delivery Fee</span>
+                            <span class="dc-calc-amount" id="delivery-cost">$0.00</span>
+                        </div>
+
+                        <div id="tip-cost-line" class="dc-calc-line dc-hidden">
+                            <span class="dc-calc-label">Driver Tip</span>
+                            <span class="dc-calc-amount" id="tip-cost">$0.00</span>
+                        </div>
+
+                        <div class="dc-calc-total">
+                            <span class="dc-total-label">Total</span>
+                            <span class="dc-total-amount" id="order-final-total">${{ total_price }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Info -->
+                    <div id="delivery-info" class="dc-delivery-info dc-hidden">
+                        <div class="dc-delivery-info-header">
+                            <i class="ph ph-truck dc-delivery-info-icon"></i>
+                            <span class="dc-delivery-info-title">Shippit Delivery</span>
+                        </div>
+                        <div class="dc-delivery-info-list">
+                            <div>• Professional courier service</div>
+                            <div>• Real-time tracking updates</div>
+                            <div>• Contactless delivery available</div>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <div style="margin-top: 1.5rem;">
+                        <button
+                            type="button"
+                            id="proceed-checkout"
+                            class="dc-button dc-button-large"
+                        >
+                            <i class="ph ph-shield-check" style="margin-right: 0.5rem;"></i>
+                            Complete Secure Order
+                        </button>
+
+                        <div id="checkout-status" class="dc-hidden" style="margin-top: 0.75rem; text-align: center;">
+                            <div style="display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                                <div class="dc-spinner" style="width: 20px; height: 20px; border: 2px solid #2563eb; border-top: 2px solid transparent; border-radius: 50%; margin-right: 0.5rem;"></div>
+                                Processing your order...
+                            </div>
+                        </div>
+
+                        <div class="dc-security">
+                            <p class="dc-security-text">
+                                <i class="ph ph-lock dc-security-icon"></i>
+                                Your payment information is secure and encrypted
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -122,44 +1096,520 @@
 </div>
 
 <script>
-    const stripe = Stripe("{{ stripe_public_key }}");
-    const checkoutButton = document.getElementById("checkout-button");
+// Isolated Checkout JavaScript - No conflicts with theme
+(function() {
+    'use strict';
 
-    checkoutButton.addEventListener("click", function () {
-        const formData = new FormData(document.getElementById("checkout-form"));
-        const data = {};
-        formData.forEach((value, key) => (data[key] = value));
-    
-        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-    
-        console.log("Form Data:", data);
-    
-        fetch("{% url 'checkout' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken
-            },
-            body: JSON.stringify(data),
-        })
-        .then(response => response.json())
-        .then(session => {
-            if (session.error) {
-                alert(session.error);
+    console.log("🚀 Isolated Dukani Checkout initializing...");
+
+    // Configuration
+    const config = {
+        stripeKey: "{{ stripe_public_key }}",
+        subtotal: {{ total_price }},
+        endpoints: {
+            quote: '/get-delivery-quote/',
+            checkout: '/create-checkout-session/'
+        }
+    };
+
+    // State management
+    let checkoutState = {
+        stripe: null,
+        currentQuote: null,
+        selectedTip: 0,
+        deliveryFee: 0,
+        isLoading: false
+    };
+
+    // DOM Elements cache
+    const elements = {};
+
+    // Initialize Stripe
+    function initStripe() {
+        try {
+            if (typeof Stripe !== 'undefined') {
+                checkoutState.stripe = Stripe(config.stripeKey);
+                console.log("✅ Stripe initialized");
+                return true;
             } else {
-                return stripe.redirectToCheckout({ sessionId: session.id });
+                console.error("❌ Stripe not available");
+                return false;
             }
-        })
-        .then(result => {
-            if (result.error) {
-                alert(result.error.message);
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
+        } catch (error) {
+            console.error("❌ Stripe initialization error:", error);
+            return false;
+        }
+    }
+
+    // Cache DOM elements
+    function cacheElements() {
+        const elementIds = [
+            'delivery-address', 'delivery-city', 'delivery-state', 'delivery-postal',
+            'quote-delivery-btn', 'quote-status', 'quote-display', 'quote-breakdown', 'quote-total',
+            'tip-selection', 'custom-tip-amount', 'current-tip',
+            'proceed-checkout', 'checkout-status', 'address-validation', 'formatted-address',
+            'delivery-cost-line', 'delivery-cost', 'tip-cost-line', 'tip-cost', 'order-final-total',
+            'delivery-info', 'order-notes', 'address-section'
+        ];
+
+        elementIds.forEach(id => {
+            elements[id] = document.getElementById(id);
         });
-    });
+
+        // Cache form elements
+        elements.deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
+        elements.tipOptions = document.querySelectorAll('.dc-tip-option');
+        elements.checkoutForm = document.getElementById('checkout-form');
+
+        console.log("✅ Elements cached");
+    }
+
+    // Handle delivery method change
+    function handleDeliveryMethodChange(event) {
+        const isDelivery = event.target.value === 'delivery';
+
+        // Update radio indicators
+        elements.deliveryMethodRadios.forEach(radio => {
+            const card = radio.nextElementSibling;
+            if (radio.checked) {
+                card.style.borderColor = '#3b82f6';
+                card.style.backgroundColor = '#eff6ff';
+                card.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+            } else {
+                card.style.borderColor = '#d1d5db';
+                card.style.backgroundColor = 'white';
+                card.style.boxShadow = 'none';
+            }
+        });
+
+        // Show/hide address section
+        if (elements['address-section']) {
+            if (isDelivery) {
+                elements['address-section'].classList.remove('dc-hidden');
+            } else {
+                elements['address-section'].classList.add('dc-hidden');
+            }
+        }
+
+        // Show/hide delivery info
+        if (elements['delivery-info']) {
+            if (isDelivery) {
+                elements['delivery-info'].classList.remove('dc-hidden');
+            } else {
+                elements['delivery-info'].classList.add('dc-hidden');
+            }
+        }
+
+        // Reset state if switching away from delivery
+        if (!isDelivery) {
+            hideDeliveryFees();
+            hideTipSection();
+            checkoutState.currentQuote = null;
+            checkoutState.deliveryFee = 0;
+            checkoutState.selectedTip = 0;
+            updateTotal();
+        }
+
+        updateQuoteButtonState();
+        console.log("📦 Delivery method:", event.target.value);
+    }
+
+    // Update quote button state
+    function updateQuoteButtonState() {
+        if (!elements['quote-delivery-btn']) return;
+
+        const address = elements['delivery-address']?.value.trim() || '';
+        const city = elements['delivery-city']?.value || '';
+        const deliveryState = elements['delivery-state']?.value || '';
+        const postal = elements['delivery-postal']?.value.trim() || '';
+
+        const isComplete = address && city && deliveryState && postal;
+        elements['quote-delivery-btn'].disabled = !isComplete;
+
+        // Show address validation
+        if (isComplete && elements['address-validation']) {
+            const formattedAddress = `${address}, ${city}, ${deliveryState} ${postal}`;
+            elements['formatted-address'].textContent = formattedAddress;
+            elements['address-validation'].classList.remove('dc-hidden');
+        } else if (elements['address-validation']) {
+            elements['address-validation'].classList.add('dc-hidden');
+        }
+    }
+
+    // Get CSRF token
+    function getCSRFToken() {
+        const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+        return tokenElement ? tokenElement.value : null;
+    }
+
+    // Get delivery quote
+    async function getDeliveryQuote() {
+        if (checkoutState.isLoading) return;
+
+        const address = elements['delivery-address'].value.trim();
+        const city = elements['delivery-city'].value;
+        const deliveryState = elements['delivery-state'].value;
+        const postal = elements['delivery-postal'].value.trim();
+
+        if (!address || !city || !deliveryState || !postal) {
+            showNotification('Please fill in all address fields', 'error');
+            return;
+        }
+
+        const fullAddress = `${address}, ${city}, ${deliveryState} ${postal}`;
+
+        // Update UI with loading state
+        checkoutState.isLoading = true;
+        const button = elements['quote-delivery-btn'];
+        const originalText = button.innerHTML;
+
+        button.disabled = true;
+        button.innerHTML = '<div class="dc-spinner" style="width: 20px; height: 20px; border: 2px solid white; border-top: 2px solid transparent; border-radius: 50%; margin-right: 0.5rem;"></div>Getting Quote...';
+
+        if (elements['quote-status']) {
+            elements['quote-status'].innerHTML = '<div style="display: flex; align-items: center; color: #2563eb;"><div class="dc-spinner" style="width: 16px; height: 16px; border: 2px solid #2563eb; border-top: 2px solid transparent; border-radius: 50%; margin-right: 0.5rem;"></div>Calculating delivery options...</div>';
+            elements['quote-status'].className = 'dc-status dc-status-loading';
+        }
+
+        try {
+            const response = await fetch(config.endpoints.quote, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ dropoff_address: fullAddress })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                checkoutState.currentQuote = data;
+                checkoutState.deliveryFee = data.total_delivery_fee;
+
+                displayQuote(data);
+                showDeliveryFees(checkoutState.deliveryFee);
+                showTipSection();
+                updateTotal();
+
+                if (elements['quote-status']) {
+                    elements['quote-status'].innerHTML = '<div style="display: flex; align-items: center; color: #059669;"><i class="ph ph-check-circle" style="margin-right: 0.5rem;"></i>Quote calculated successfully!</div>';
+                    elements['quote-status'].className = 'dc-status dc-status-success';
+                }
+
+                showNotification(`Delivery available for ${data.total_delivery_fee.toFixed(2)}`, 'success');
+
+            } else {
+                throw new Error(data?.error || 'Quote request failed');
+            }
+
+        } catch (error) {
+            console.error("Quote request failed:", error);
+
+            if (elements['quote-status']) {
+                elements['quote-status'].innerHTML = `<div style="display: flex; align-items: center; color: #dc2626;"><i class="ph ph-x-circle" style="margin-right: 0.5rem;"></i>Quote failed: ${error.message}</div>`;
+                elements['quote-status'].className = 'dc-status dc-status-error';
+            }
+
+            showNotification(`Quote failed: ${error.message}`, 'error');
+
+        } finally {
+            checkoutState.isLoading = false;
+            button.disabled = false;
+            button.innerHTML = originalText;
+            updateQuoteButtonState();
+        }
+    }
+
+    // Display quote results
+    function displayQuote(data) {
+        if (!elements['quote-display']) return;
+
+        let businessHTML = '';
+        Object.entries(data.business_quotes).forEach(([businessId, quote]) => {
+            if (quote.error) {
+                businessHTML += `
+                    <div class="dc-quote-item" style="background: #fef2f2; border-color: #fecaca;">
+                        <div class="dc-quote-business">
+                            <i class="ph ph-storefront dc-quote-business-icon" style="color: #dc2626;"></i>
+                            <div class="dc-quote-business-info">
+                                <h4>${quote.business_name}</h4>
+                            </div>
+                        </div>
+                        <div class="dc-quote-price">
+                            <span style="color: #dc2626; font-size: 0.875rem;">${quote.error}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const transitTime = quote.quote_data?.estimated_transit_time || 'Standard delivery';
+                businessHTML += `
+                    <div class="dc-quote-item">
+                        <div class="dc-quote-business">
+                            <i class="ph ph-storefront dc-quote-business-icon"></i>
+                            <div class="dc-quote-business-info">
+                                <h4>${quote.business_name}</h4>
+                                <p>via ${quote.courier}</p>
+                            </div>
+                        </div>
+                        <div class="dc-quote-price">
+                            <div class="dc-quote-price-amount">${quote.delivery_fee.toFixed(2)}</div>
+                            <div class="dc-quote-price-time">${transitTime}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        if (elements['quote-breakdown']) {
+            elements['quote-breakdown'].innerHTML = businessHTML;
+        }
+
+        if (elements['quote-total']) {
+            elements['quote-total'].textContent = `${data.total_delivery_fee.toFixed(2)}`;
+        }
+
+        elements['quote-display'].classList.remove('dc-hidden');
+    }
+
+    // Show delivery fees
+    function showDeliveryFees(fee) {
+        if (elements['delivery-cost-line'] && elements['delivery-cost']) {
+            elements['delivery-cost-line'].classList.remove('dc-hidden');
+            elements['delivery-cost'].textContent = `${fee.toFixed(2)}`;
+        }
+    }
+
+    // Hide delivery fees
+    function hideDeliveryFees() {
+        if (elements['delivery-cost-line']) {
+            elements['delivery-cost-line'].classList.add('dc-hidden');
+        }
+        if (elements['quote-display']) {
+            elements['quote-display'].classList.add('dc-hidden');
+        }
+    }
+
+    // Show tip section
+    function showTipSection() {
+        if (elements['tip-selection']) {
+            elements['tip-selection'].classList.remove('dc-hidden');
+        }
+    }
+
+    // Hide tip section
+    function hideTipSection() {
+        if (elements['tip-selection']) {
+            elements['tip-selection'].classList.add('dc-hidden');
+        }
+        if (elements['tip-cost-line']) {
+            elements['tip-cost-line'].classList.add('dc-hidden');
+        }
+    }
+
+    // Handle tip selection
+    function handleTipSelect(event) {
+        if (!event.target.classList.contains('dc-tip-option')) return;
+
+        // Clear other selections
+        elements.tipOptions.forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        // Style selected button
+        event.target.classList.add('selected');
+
+        // Clear custom input
+        if (elements['custom-tip-amount']) {
+            elements['custom-tip-amount'].value = '';
+        }
+
+        checkoutState.selectedTip = parseFloat(event.target.dataset.amount);
+        updateTipDisplay();
+    }
+
+    // Handle custom tip
+    function handleCustomTip(event) {
+        // Clear preset selections
+        elements.tipOptions.forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        checkoutState.selectedTip = parseFloat(event.target.value) || 0;
+        updateTipDisplay();
+    }
+
+    // Update tip display
+    function updateTipDisplay() {
+        if (elements['current-tip']) {
+            elements['current-tip'].textContent = checkoutState.selectedTip.toFixed(2);
+        }
+
+        if (checkoutState.selectedTip > 0) {
+            if (elements['tip-cost-line'] && elements['tip-cost']) {
+                elements['tip-cost-line'].classList.remove('dc-hidden');
+                elements['tip-cost'].textContent = `${checkoutState.selectedTip.toFixed(2)}`;
+            }
+        } else {
+            if (elements['tip-cost-line']) {
+                elements['tip-cost-line'].classList.add('dc-hidden');
+            }
+        }
+
+        updateTotal();
+    }
+
+    // Update total
+    function updateTotal() {
+        const total = config.subtotal + checkoutState.deliveryFee + checkoutState.selectedTip;
+
+        if (elements['order-final-total']) {
+            elements['order-final-total'].textContent = `${total.toFixed(2)}`;
+        }
+    }
+
+    // Handle checkout
+    async function handleCheckout() {
+        const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked')?.value;
+
+        if (deliveryMethod === 'delivery' && !checkoutState.currentQuote) {
+            showNotification('Please get a delivery quote first', 'error');
+            return;
+        }
+
+
+        const formData = {
+            delivery_method: deliveryMethod,
+            address: elements['delivery-address']?.value || '',
+            city: elements['delivery-city']?.value || '',
+            state: elements['delivery-state']?.value || '',
+            postal_code: elements['delivery-postal']?.value || '',
+            note: elements['order-notes']?.value || '',
+            tip_amount: checkoutState.selectedTip,
+            delivery_fee: checkoutState.deliveryFee
+        };
+
+        // Update UI
+        const button = elements['proceed-checkout'];
+        const originalText = button.innerHTML;
+
+        button.disabled = true;
+        button.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>Processing...';
+
+        if (elements['checkout-status']) {
+            elements['checkout-status'].classList.remove('hidden');
+        }
+
+        try {
+            const response = await fetch(config.endpoints.checkout, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const session = await response.json();
+
+            if (session.error) {
+                throw new Error(session.error);
+            }
+
+            // Redirect to Stripe
+            const result = await checkoutState.stripe.redirectToCheckout({
+                sessionId: session.id
+            });
+
+            if (result.error) {
+                throw new Error(result.error.message);
+            }
+
+        } catch (error) {
+            console.error("Checkout error:", error);
+            showNotification(`Checkout failed: ${error.message}`, 'error');
+
+            // Reset UI
+            button.disabled = false;
+            button.innerHTML = originalText;
+            if (elements['checkout-status']) {
+                elements['checkout-status'].classList.add('hidden');
+            }
+        }
+    }
+
+    // Simple notification function
+    function showNotification(message, type) {
+        console.log(`${type.toUpperCase()}: ${message}`);
+        // You can implement a more sophisticated notification system here
+    }
+
+    // Event listeners
+    function attachEventListeners() {
+        // Delivery method change
+        elements.deliveryMethodRadios.forEach(radio => {
+            radio.addEventListener('change', handleDeliveryMethodChange);
+        });
+
+        // Address field validation
+        ['delivery-address', 'delivery-city', 'delivery-state', 'delivery-postal'].forEach(id => {
+            const element = elements[id];
+            if (element) {
+                element.addEventListener('input', updateQuoteButtonState);
+                element.addEventListener('change', updateQuoteButtonState);
+            }
+        });
+
+        // Quote button
+        if (elements['quote-delivery-btn']) {
+            elements['quote-delivery-btn'].addEventListener('click', getDeliveryQuote);
+        }
+
+        // Tip selection
+        if (elements.tipOptions) {
+            elements.tipOptions.forEach(btn => {
+                btn.addEventListener('click', handleTipSelect);
+            });
+        }
+
+        // Custom tip
+        if (elements['custom-tip-amount']) {
+            elements['custom-tip-amount'].addEventListener('input', handleCustomTip);
+        }
+
+        // Checkout button
+        if (elements['proceed-checkout']) {
+            elements['proceed-checkout'].addEventListener('click', handleCheckout);
+        }
+
+        console.log("✅ Event listeners attached");
+    }
+
+    // Initialize everything
+    function init() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+            return;
+        }
+
+        cacheElements();
+
+        if (initStripe()) {
+            attachEventListeners();
+            updateQuoteButtonState();
+            console.log("✅ Isolated checkout ready!");
+        } else {
+            console.error("❌ Checkout initialization failed");
+        }
+    }
+
+    // Initialize when DOM is ready
+    init();
+
+})();
 </script>
 
+<!-- Load Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
 
 {% endblock content %}

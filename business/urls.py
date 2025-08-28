@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import BusinessRegistrationView
+from .views import BusinessRegistrationView, BusinessSubscriptionSuccessView, BusinessSubscriptionCancelView, BusinessConnectRefreshView, BusinessConnectCompleteView
 
 urlpatterns = [
     path('', views.home, name="home"),
@@ -14,7 +14,18 @@ urlpatterns = [
     path('create-event/', views.create_event, name='create_event'),
     path('event/<int:event_id>/', views.event_detail, name='event_detail'),
     path('event/<int:event_id>/edit/', views.edit_event, name='edit_event'),
+
+    # Business registration and subscription routes (MOVED UP)
+    path('business/registration/', views.BusinessRegistrationView.as_view(), name='business_registration'),
+    path('business/subscription/success/', BusinessSubscriptionSuccessView.as_view(), name='business_subscription_success'),
+    path('business/subscription/cancel/', BusinessSubscriptionCancelView.as_view(), name='business_subscription_cancel'),
+    path('business/connect/refresh/', BusinessConnectRefreshView.as_view(), name='business_connect_refresh'),
+    path('business/connect/complete/', BusinessConnectCompleteView.as_view(), name='business_connect_complete'),
+
+    # User registration business route
     path('user/register-business', BusinessRegistrationView.as_view(), name="business_registration"),
+
+    # Business specific routes with slugs (MOVED DOWN)
     path('business/<slug:business_slug>/', views.BusinessDetailView.as_view(), name='business_detail'),
     path('business/<slug:business_slug>/orders/', views.BusinessOrdersView.as_view(), name='business_orders'),
     path('business/<slug:business_slug>/delete/', views.BusinessDeleteView.as_view(), name='delete_business'),
@@ -28,12 +39,17 @@ urlpatterns = [
     path('business/<slug:business_slug>/service/create/', views.ServiceCreateView.as_view(), name='service_create'),
     path('business/<slug:business_slug>/service/<slug:service_slug>/edit/', views.ServiceEditView.as_view(), name='service_edit'),
     path('business/<slug:business_slug>/service/<slug:service_slug>/', views.service_detail, name='service_detail'),
+    path('business/<str:business_slug>/service/<str:service_slug>/review/', views.ServiceReviewView.as_view(), name='service_review'),
+    path('delete-product-image/<int:image_id>/', views.delete_product_image, name='delete_product_image'),
+
+    # Other routes
     path('cart/', views.CartView.as_view(), name='cart'),
     path('cart/delete/<int:cart_item_id>/', views.delete_cart_item, name='delete_cart_item'),
     path('cart/update_quantity/', views.CartView.as_view(), name='update_quantity'),
     path('cart/data/', views.CartView.as_view(), name='cart_data'),
     path('cart/add/', views.CartView.as_view(), name='add'),
     path('checkout/', views.CreateCheckoutSessionView.as_view(), name='checkout'),
+    path('create-checkout-session/', views.CreateCheckoutSessionView.as_view(), name='create_checkout_session'),
     path('success/', views.PaymentSuccessView.as_view(), name='success'),
     path('cancel/', views.PaymentSuccessView.as_view(), name='cancel'),
     path('orders/', views.UserOrdersView.as_view(), name='user_orders'),
@@ -49,5 +65,13 @@ urlpatterns = [
     path('save_event/<int:event_id>/', views.save_event, name='save_event'),
     path('remove_saved_event/<int:event_id>/', views.remove_saved_event, name='remove_saved_event'),
     path('saved_events/', views.saved_events, name='saved_events'),
-    path('business/<str:business_slug>/service/<str:service_slug>/review/', views.ServiceReviewView.as_view(), name='service_review'),
+    path('verify-email/<uidb64>/<token>/', views.EmailVerificationView.as_view(), name='email_verification'),
+
+
+    path('validate-address/', views.validate_address_free, name='validate_address'),
+    path('delivery-tracking/<str:delivery_id>/', views.delivery_tracking, name='delivery_tracking'),
+    path('test-doordash/', views.test_doordash_credentials, name='test_doordash'),
+    path('get-delivery-quote/', views.DeliveryQuoteView.as_view(), name='get_delivery_quote'),
+    path('debug-business-addresses/', views.debug_business_addresses, name='debug_business_addresses'),
+    path('test-shippit/', views.test_shippit_directly, name='test_shippit'),
 ]

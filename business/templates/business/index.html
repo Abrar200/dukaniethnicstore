@@ -12,7 +12,16 @@
                     <div class="slider-item h-full w-full relative">
                         <div class="container w-full h-full flex items-center relative">
                             <div class="text-content basis-1/2 mt-8">
-                                <div class="text-display md:mt-5 mt-2">Summer Sale Collections</div>
+                                <!-- Alternatively try this version which uses max-width instead of min-width -->
+                                <style>
+                                    @media (max-width: 1023px) {
+                                        .mobile-hidden {
+                                            display: none !important;
+                                        }
+                                    }
+                                </style>
+                                <div class="text-display md:mt-5 mt-2 mobile-hidden">Summer Sale Collections</div>
+                                <div style="margin-top: 50px;"></div>
                                 <a href='{% url "products" %}' class="button-main md:mt-8 mt-3">Shop Now</a>
                             </div>
                             <div class="sub-img absolute sm:w-1/2 w-3/5 2xl:-right-[60px] -right-[16px] bottom-0">
@@ -25,7 +34,15 @@
                     <div class="slider-item h-full w-full relative">
                         <div class="container w-full h-full flex items-center relative">
                             <div class="text-content basis-1/2 mt-8">
-                                <div class="text-display md:mt-5 mt-2">Summer Sale Collections</div>
+                                <style>
+                                    @media (max-width: 1023px) {
+                                        .mobile-hidden {
+                                            display: none !important;
+                                        }
+                                    }
+                                </style>
+                                <div class="text-display md:mt-5 mt-2 mobile-hidden">Summer Sale Collections</div>
+                                <div style="margin-top: 50px;"></div>
                                 <a href='{% url "products" %}' class="button-main md:mt-8 mt-3">Shop Now</a>
                             </div>
                             <div class="sub-img absolute w-1/2 2xl:-right-[60px] -right-[0] sm:-bottom-[60px] bottom-0">
@@ -38,7 +55,15 @@
                     <div class="slider-item h-full w-full relative">
                         <div class="container w-full h-full flex items-center relative">
                             <div class="text-content basis-1/2 mt-8">
-                                <div class="text-display md:mt-5 mt-2">Summer Sale Collections</div>
+                                <style>
+                                    @media (max-width: 1023px) {
+                                        .mobile-hidden {
+                                            display: none !important;
+                                        }
+                                    }
+                                </style>
+                                <div class="text-display md:mt-5 mt-2 mobile-hidden">Summer Sale Collections</div>
+                                <div style="margin-top: 50px;"></div>
                                 <a href='{% url "products" %}' class="button-main md:mt-8 mt-3">Shop Now</a>
                             </div>
                             <div class="sub-img absolute sm:w-1/2 w-2/3 2xl:-right-[60px] -right-[36px] sm:bottom-0 -bottom-[30px]">
@@ -139,27 +164,27 @@
                     <div class="swiper-wrapper" id="swiper-wrapper-32cbfc86ab450105" aria-live="polite">
                         <!-- List six product -->
                         {% for product in products %}
-                        
+
                             <div class="swiper-slide" role="group" aria-label="{{ forloop.counter }} / {{ products|length }}" data-swiper-slide-index="{{ forloop.counter0 }}" style="width: 171px; margin-right: 16px;">
                                 <div class="product-item grid-type" data-item="{{ product.id }}">
                                     <div class="product-main cursor-pointer block" data-item="{{ product.id }}">
                                         <div class="product-thumb bg-white relative overflow-hidden rounded-2xl">
                                             <!-- Product tag -->
                                             <a href="{% url 'product_detail' product.business.business_slug product.product_slug %}">
-                                            <div class="product-img w-full h-full aspect-[3/4]">
-                                                <img class="w-full h-full object-cover duration-700" src="{{ product.image.url }}" alt="{{ product.name }}">
+                                            <div class="product-img w-full h-full aspect-[2/1]">
+                                                <img style="max-height: 150px;" class="w-full h-full object-cover duration-700" src="{{ product.image.url }}" alt="{{ product.name }}">
                                             </div>
                                             </a>
                                             <!-- Other product details -->
                                         </div>
                                         <div class="product-infor mt-4 lg:mb-7">
                                             <div class="product-name text-title duration-300">{{ product.name }}</div>
-                                            
+
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        
+
                         {% endfor %}
                     </div>
                     <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
@@ -181,10 +206,10 @@
                                 <div class="product-thumb bg-white relative overflow-hidden rounded-2xl">
                                     <div class="product-tag text-button-uppercase bg-green px-3 py-0.5 inline-block rounded-full absolute top-3 left-3 z-[1]">New</div>
                                     <div class="list-action-right absolute top-3 right-3 max-lg:hidden"></div>
-                                    <div class="product-img w-full h-full aspect-[3/4]">
+                                    <div class="product-img w-full h-full aspect-[2/1]">
                                         <a href="{% url "product_detail" product.business.business_slug product.product_slug %}">
-                                            <img key="0" class="w-full h-full object-cover duration-700" src="{{ product.image.url }}" alt="img">
-                                            <img key="1" class="w-full h-full object-cover duration-700" src="{{ product.image2.url }}" alt="img">
+                                            <img key="0" style="max-height: 250px;" class="w-full h-full object-cover duration-700" src="{{ product.image.url }}" alt="img">
+                                            <img key="1" style="max-height: 250px;" class="w-full h-full object-cover duration-700" src="{{ product.image2.url }}" alt="img">
                                         </a>
                                     </div>
                                     <div class="list-action grid grid-cols-2 gap-3 px-5 absolute w-full bottom-5 max-lg:hidden">
@@ -225,12 +250,12 @@
             </div>
         </div>
     </div>
-    
+
 
     <a class="scroll-to-top-btn" href="#top-nav"><i class="ph-bold ph-caret-up"></i></a>
 
     <!-- Modal -->
-    
+
 
     <div class='modal-search-block'>
         <div class='modal-search-main md:p-10 p-6 rounded-[32px]'>

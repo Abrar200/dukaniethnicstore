@@ -26,14 +26,13 @@
 {% if messages %}
 <div class="container mt-3">
     {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}" role="alert">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
             {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endfor %}
 </div>
 {% endif %}
-
-
 
 {% block content %}
 
@@ -42,51 +41,163 @@
         <div class="content-main flex gap-y-8 max-md:flex-col">
             <div class="left md:w-1/2 w-full lg:pr-[60px] md:pr-[40px] md:border-r border-line">
                 <div class="heading4">Register</div>
-                {% for message in messages %}
-                    *{{ message }}
-                {% endfor %}
-                <form class="md:mt-7 mt-4" action="{% url 'register' %}" method="post">
+
+                <form class="md:mt-7 mt-4" action="{% url 'register' %}" method="post" id="registrationForm">
                     {% csrf_token %}
-                    <div class="email ">
-                        <input name="first_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username" type="text"
-                            placeholder="First Name *" required />
-                    </div>
-                    <div class="email mt-5">
-                        <input name="last_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username" type="text"
-                            placeholder="Last Name *" required />
-                    </div>
-                    <div class="email mt-5">
-                        <input name="username" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username" type="text"
-                            placeholder="Username *" required />
-                    </div>
-                    <div class="email mt-5">
-                        <input name="email" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username" type="email"
-                            placeholder="Email address *" required />
+
+                    <!-- First Name -->
+                    <div class="email">
+                        <input name="first_name"
+                               class="border-line px-4 pt-3 pb-3 w-full rounded-lg"
+                               id="first_name"
+                               type="text"
+                               placeholder="First Name *"
+                               value="{{ form_data.first_name|default:'' }}"
+                               required />
                     </div>
 
+                    <!-- Last Name -->
+                    <div class="email mt-5">
+                        <input name="last_name"
+                               class="border-line px-4 pt-3 pb-3 w-full rounded-lg"
+                               id="last_name"
+                               type="text"
+                               placeholder="Last Name *"
+                               value="{{ form_data.last_name|default:'' }}"
+                               required />
+                    </div>
+
+                    <!-- Username with validation feedback -->
+                    <div class="username-field mt-5">
+                        <input name="username"
+                               class="border-line px-4 pt-3 pb-3 w-full rounded-lg"
+                               id="username"
+                               type="text"
+                               placeholder="Username *"
+                               value="{{ form_data.username|default:'' }}"
+                               pattern="[a-zA-Z0-9_.]+"
+                               title="Username can only contain letters, numbers, underscores, and periods"
+                               required />
+                        <div class="mt-2">
+                            <small class="text-secondary block">
+                                <i class="ph ph-info-circle"></i>
+                                Username requirements:
+                            </small>
+                            <ul class="text-xs text-secondary mt-1 ml-4">
+                                <li id="username-letters" class="validation-rule">
+                                    <span class="validation-icon">•</span> Only letters, numbers, underscores (_), and periods (.)
+                                </li>
+                                <li id="username-unique" class="validation-rule">
+                                    <span class="validation-icon">•</span> Must be unique (we'll check when you submit)
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="email mt-5">
+                        <input name="email"
+                               class="border-line px-4 pt-3 pb-3 w-full rounded-lg"
+                               id="email"
+                               type="email"
+                               placeholder="Email address *"
+                               value="{{ form_data.email|default:'' }}"
+                               required />
+                        <small class="text-secondary mt-1 block">
+                            <i class="ph ph-info-circle"></i>
+                            We'll send a verification email to this address
+                        </small>
+                    </div>
+
+                    <!-- Password with real-time validation and toggle -->
                     <div class="pass mt-5">
-                        <input name="password" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="password" type="password"
-                            placeholder="Password *" required />
-                        <small class="text-secondary mt-2 block">Password must be at least 12 characters long, with an uppercase letter, a lowercase letter, a number, and a special character.</small>
+                        <div class="password-container relative">
+                            <input name="password"
+                                   class="border-line px-4 pt-3 pb-3 w-full rounded-lg pr-12"
+                                   id="password"
+                                   type="password"
+                                   placeholder="Password *"
+                                   required />
+                            <button type="button"
+                                    class="password-toggle-btn absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer p-1 rounded"
+                                    onclick="togglePasswordVisibility('password')"
+                                    aria-label="Show password">
+                                <i class="ph ph-eye text-lg text-gray-600 hover:text-gray-800" id="password-eye"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-secondary block">
+                                <i class="ph ph-shield-check"></i>
+                                Password requirements:
+                            </small>
+                            <ul class="text-xs text-secondary mt-1 ml-4">
+                                <li id="length-check" class="validation-rule">
+                                    <span class="validation-icon">✗</span> At least 12 characters long
+                                </li>
+                                <li id="uppercase-check" class="validation-rule">
+                                    <span class="validation-icon">✗</span> At least one uppercase letter (A-Z)
+                                </li>
+                                <li id="lowercase-check" class="validation-rule">
+                                    <span class="validation-icon">✗</span> At least one lowercase letter (a-z)
+                                </li>
+                                <li id="number-check" class="validation-rule">
+                                    <span class="validation-icon">✗</span> At least one number (0-9)
+                                </li>
+                                <li id="special-check" class="validation-rule">
+                                    <span class="validation-icon">✗</span> At least one special character (@$!%*#?&)
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+
+                    <!-- Confirm Password with toggle -->
                     <div class="confirm-pass mt-5">
-                        <input name="confirmPassword" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="confirmPassword"
-                            type="password" placeholder="Confirm Password *" required />
+                        <div class="password-container relative">
+                            <input name="confirm_password"
+                                   class="border-line px-4 pt-3 pb-3 w-full rounded-lg pr-12"
+                                   id="confirmPassword"
+                                   type="password"
+                                   placeholder="Confirm Password *"
+                                   required />
+                            <button type="button"
+                                    class="password-toggle-btn absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer p-1 rounded"
+                                    onclick="togglePasswordVisibility('confirmPassword')"
+                                    aria-label="Show confirm password">
+                                <i class="ph ph-eye text-lg text-gray-600 hover:text-gray-800" id="confirmPassword-eye"></i>
+                            </button>
+                        </div>
+                        <div id="password-match-feedback" class="mt-2 hidden">
+                            <small class="validation-rule">
+                                <span class="validation-icon">✗</span> Passwords must match
+                            </small>
+                        </div>
                     </div>
+
+                    <!-- Terms and Conditions -->
                     <div class='flex items-center mt-5'>
                         <div class="block-input">
-                            <input type="checkbox" name='remember' id='remember' />
+                            <input type="checkbox" name='terms_accepted' id='terms_accepted' required />
                             <i class='ph-fill ph-check-square icon-checkbox text-xl'></i>
                         </div>
-                        <label for='remember' class="pl-2 cursor-pointer text-secondary2">I agree to the
-                            <a href='{% url "terms-and-conditions" %}' class='text-black hover:underline pl-1'>Terms and Conditions</a>
+                        <label for='terms_accepted' class="pl-2 cursor-pointer text-secondary2">I agree to the
+                            <a href='{% url "terms-and-conditions" %}' class='text-black hover:underline pl-1' target="_blank">Terms and Conditions</a>
                         </label>
                     </div>
+
+                    <!-- Submit Button -->
                     <div class="block-button md:mt-7 mt-4">
-                        <button class="button-main">Register</button>
+                        <button
+                          type="submit"
+                          class="button-main"
+                          id="submitBtn"
+                          style="background-color: black; color: white;"
+                        >
+                          Register
+                        </button>
                     </div>
                 </form>
             </div>
+
             <div class="right md:w-1/2 w-full lg:pl-[60px] md:pl-[40px] flex items-center">
                 <div class="text-content">
                     <div class="heading4">Already have an account?</div>
@@ -100,5 +211,337 @@
         </div>
     </div>
 </div>
+
+<style>
+.validation-rule {
+    display: flex;
+    align-items: center;
+    margin: 2px 0;
+}
+
+.validation-rule.valid {
+    color: #10b981;
+}
+
+.validation-rule.invalid {
+    color: #ef4444;
+}
+
+.validation-icon {
+    margin-right: 8px;
+    font-weight: bold;
+    width: 12px;
+}
+
+.validation-rule.valid .validation-icon {
+    color: #10b981;
+}
+
+.validation-rule.invalid .validation-icon {
+    color: #ef4444;
+}
+
+.border-success {
+    border-color: #10b981 !important;
+}
+
+.border-error {
+    border-color: #ef4444 !important;
+}
+
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+}
+
+.alert-success {
+    color: #065f46;
+    background-color: #d1fae5;
+    border-color: #a7f3d0;
+}
+
+.alert-error {
+    color: #991b1b;
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+}
+
+.alert-warning {
+    color: #92400e;
+    background-color: #fef3c7;
+    border-color: #fcd34d;
+}
+
+.btn-close {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+    color: #000;
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.btn-close:hover {
+    opacity: 0.75;
+}
+
+/* Password container and toggle styles */
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.password-toggle-btn:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.password-toggle-btn i {
+    display: block;
+    transition: color 0.2s ease;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registrationForm');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const usernameInput = document.getElementById('username');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Password validation rules
+    const validationRules = {
+        length: {
+            element: document.getElementById('length-check'),
+            test: (password) => password.length >= 12
+        },
+        uppercase: {
+            element: document.getElementById('uppercase-check'),
+            test: (password) => /[A-Z]/.test(password)
+        },
+        lowercase: {
+            element: document.getElementById('lowercase-check'),
+            test: (password) => /[a-z]/.test(password)
+        },
+        number: {
+            element: document.getElementById('number-check'),
+            test: (password) => /[0-9]/.test(password)
+        },
+        special: {
+            element: document.getElementById('special-check'),
+            test: (password) => /[@$!%*#?&]/.test(password)
+        }
+    };
+
+    // Password visibility toggle function
+    window.togglePasswordVisibility = function(inputId) {
+        const input = document.getElementById(inputId);
+        const eyeIcon = document.getElementById(inputId + '-eye');
+        const button = eyeIcon.parentElement;
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            eyeIcon.className = 'ph ph-eye-slash text-lg text-gray-600 hover:text-gray-800';
+            button.setAttribute('aria-label', 'Hide password');
+        } else {
+            input.type = 'password';
+            eyeIcon.className = 'ph ph-eye text-lg text-gray-600 hover:text-gray-800';
+            button.setAttribute('aria-label', 'Show password');
+        }
+    };
+
+    // Real-time password validation
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let allValid = true;
+
+        // Check each validation rule
+        Object.keys(validationRules).forEach(key => {
+            const rule = validationRules[key];
+            const isValid = rule.test(password);
+
+            if (isValid) {
+                rule.element.classList.add('valid');
+                rule.element.classList.remove('invalid');
+                rule.element.querySelector('.validation-icon').textContent = '✓';
+            } else {
+                rule.element.classList.add('invalid');
+                rule.element.classList.remove('valid');
+                rule.element.querySelector('.validation-icon').textContent = '✗';
+                allValid = false;
+            }
+        });
+
+        // Update input border color
+        if (password.length > 0) {
+            if (allValid) {
+                passwordInput.classList.add('border-success');
+                passwordInput.classList.remove('border-error');
+            } else {
+                passwordInput.classList.add('border-error');
+                passwordInput.classList.remove('border-success');
+            }
+        } else {
+            passwordInput.classList.remove('border-success', 'border-error');
+        }
+
+        // Check password match if confirm password has value
+        checkPasswordMatch();
+    });
+
+    // Username validation
+    usernameInput.addEventListener('input', function() {
+        const username = this.value;
+        const usernamePattern = /^[a-zA-Z0-9_.]+$/;
+        const lettersRule = document.getElementById('username-letters');
+
+        if (username.length > 0) {
+            if (usernamePattern.test(username)) {
+                lettersRule.classList.add('valid');
+                lettersRule.classList.remove('invalid');
+                lettersRule.querySelector('.validation-icon').textContent = '✓';
+                usernameInput.classList.add('border-success');
+                usernameInput.classList.remove('border-error');
+            } else {
+                lettersRule.classList.add('invalid');
+                lettersRule.classList.remove('valid');
+                lettersRule.querySelector('.validation-icon').textContent = '✗';
+                usernameInput.classList.add('border-error');
+                usernameInput.classList.remove('border-success');
+            }
+        } else {
+            lettersRule.classList.remove('valid', 'invalid');
+            lettersRule.querySelector('.validation-icon').textContent = '•';
+            usernameInput.classList.remove('border-success', 'border-error');
+        }
+    });
+
+    // Password match validation
+    function checkPasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const matchFeedback = document.getElementById('password-match-feedback');
+        const matchRule = matchFeedback.querySelector('.validation-rule');
+
+        if (confirmPassword.length > 0) {
+            matchFeedback.classList.remove('hidden');
+
+            if (password === confirmPassword) {
+                matchRule.classList.add('valid');
+                matchRule.classList.remove('invalid');
+                matchRule.querySelector('.validation-icon').textContent = '✓';
+                matchRule.querySelector('span:last-child').textContent = 'Passwords match';
+                confirmPasswordInput.classList.add('border-success');
+                confirmPasswordInput.classList.remove('border-error');
+            } else {
+                matchRule.classList.add('invalid');
+                matchRule.classList.remove('valid');
+                matchRule.querySelector('.validation-icon').textContent = '✗';
+                matchRule.querySelector('span:last-child').textContent = 'Passwords must match';
+                confirmPasswordInput.classList.add('border-error');
+                confirmPasswordInput.classList.remove('border-success');
+            }
+        } else {
+            matchFeedback.classList.add('hidden');
+            confirmPasswordInput.classList.remove('border-success', 'border-error');
+        }
+    }
+
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const username = usernameInput.value;
+
+        // Check password requirements
+        let passwordValid = true;
+        Object.keys(validationRules).forEach(key => {
+            if (!validationRules[key].test(password)) {
+                passwordValid = false;
+            }
+        });
+
+        // Check username pattern
+        const usernameValid = /^[a-zA-Z0-9_.]+$/.test(username);
+
+        // Check password match
+        const passwordsMatch = password === confirmPassword;
+
+        if (!passwordValid) {
+            e.preventDefault();
+            alert('Please ensure your password meets all requirements.');
+            passwordInput.focus();
+            return;
+        }
+
+        if (!usernameValid) {
+            e.preventDefault();
+            alert('Username can only contain letters, numbers, underscores, and periods.');
+            usernameInput.focus();
+            return;
+        }
+
+        if (!passwordsMatch) {
+            e.preventDefault();
+            alert('Passwords do not match.');
+            confirmPasswordInput.focus();
+            return;
+        }
+
+        // Show loading state
+        submitBtn.textContent = 'Creating Account...';
+        submitBtn.disabled = true;
+    });
+
+    // Auto-dismiss alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 500);
+            }
+        }, 5000);
+    });
+
+    // Handle alert close buttons
+    document.querySelectorAll('.btn-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert').remove();
+        });
+    });
+});
+</script>
 
 {% endblock content %}

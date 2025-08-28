@@ -12,7 +12,7 @@
         <div class="blog-content flex justify-between max-lg:flex-col gap-y-10">
             <div class="main xl:w-3/4 lg:w-2/3 lg:pr-[15px]">
                 <div class="heading3 blog-title mt-3">{{ event.title }}</div>
-                
+
                 <div class="author flex items-center gap-4 mt-4">
                     <div class='flex items-center gap-2'>
                         <div class="blog-author caption1 text-secondary">by {{ event.organizer.first_name }} {{ event.organizer.last_name }}</div>
@@ -20,7 +20,7 @@
                         <div class="blog-date caption1 text-secondary">{{ event.created_at|date:"g:i a, M j, Y" }}</div>
                     </div>
                 </div>
-            
+
                 {% if request.user.is_authenticated %}
                     <button class="save-button bg-white rounded-full p-2 shadow-md" style="margin-top: 10px;" data-event-id="{{ event.id }}">
                         {% if is_saved %}
@@ -29,6 +29,12 @@
                             <i class="fa fa-heart-o" aria-hidden="true"> Save Event</i>
                         {% endif %}
                     </button>
+                {% endif %}
+
+                {% if request.user == event.organizer %}
+                    <a href="{% url 'edit_event' event.id %}"><button class="bg-white rounded-full p-2 shadow-md" style="margin-top: 10px;" data-event-id="{{ event.id }}">
+                        Edit Event
+                    </button></a>
                 {% endif %}
 
                 <div class="bg-img md:py-10 py-6">
@@ -44,7 +50,7 @@
                     <div class="blog-description body1 mt-5">{{ event.description }}</div>
                 </div>
             </div>
-            
+
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     const saveButtons = document.querySelectorAll('.save-button');

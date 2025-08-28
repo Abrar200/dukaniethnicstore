@@ -1,49 +1,159 @@
+<!-- Update your business/templates/business/success.html -->
 {% extends "business/base.html" %}
 
 {% load static %}
 
-{% block slider %}
-
-
-<div class="breadcrumb-block style-shared">
-    <div class="breadcrumb-main bg-linear overflow-hidden">
-        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
-            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
-                <div class="text-content">
-                    <div class="heading2 text-center">Payment Successful</div>
-                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
-                        <a href="{% url 'home' %}">Homepage</a>
-                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
-                        <div class='text-secondary2 capitalize'>Payment Successful</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% endblock slider %}
-
-{% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
+{% block title %}Order Successful{% endblock %}
 
 {% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto text-center">
+        <!-- Success Icon -->
+        <div class="mb-6">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <i class="ph ph-check text-3xl text-green-600"></i>
+            </div>
+        </div>
 
-<div class="store-list md:py-20 py-10">
-    <div class="container">
-        <h1 class="text-3xl font-semibold mb-8">Order Successful!</h1>
-        <div class="overflow-x-auto">
-        <p>Thank you for your purchase. Your order has been successfully placed.</p>
-        <a href="{% url 'user_orders' %}">View Your Orders</a>
+        <!-- Success Message -->
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Order Successful!</h1>
+        <p class="text-lg text-gray-600 mb-8">
+            Thank you for your purchase. Your order has been confirmed.
+        </p>
+
+        <!-- Order Details -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6 text-left">
+            <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span>Order Number:</span>
+                    <span class="font-medium">{{ order.ref_code }}</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span>Order Total:</span>
+                    <span class="font-medium">${{ order.total_amount }}</span>
+                </div>
+
+                {% if order.delivery_method == 'delivery' %}
+                <div class="flex justify-between">
+                    <span>Delivery Method:</span>
+                    <span class="font-medium">DoorDash Delivery</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span>Delivery Fee:</span>
+                    <span class="font-medium">${{ order.delivery_fee }}</span>
+                </div>
+
+                {% if order.tip_amount > 0 %}
+                <div class="flex justify-between">
+                    <span>Driver Tip:</span>
+                    <span class="font-medium">${{ order.tip_amount }}</span>
+                </div>
+                {% endif %}
+
+                <div class="flex justify-between">
+                    <span>Delivery Address:</span>
+                    <span class="font-medium">{{ order.address }}, {{ order.city }}, {{ order.state }} {{ order.postal_code }}</span>
+                </div>
+
+                <hr class="my-3">
+
+                <div class="flex justify-between font-semibold text-lg">
+                    <span>Total with Delivery:</span>
+                    <span>${{ total_with_delivery }}</span>
+                </div>
+
+                {% else %}
+                <div class="flex justify-between">
+                    <span>Fulfillment Method:</span>
+                    <span class="font-medium">Customer Pickup</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Delivery Information -->
+        {% if order.delivery_method == 'delivery' %}
+        <div class="bg-blue-50 rounded-lg p-6 mb-6 text-left">
+            <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                <i class="ph ph-truck mr-2"></i>
+                Delivery Information
+            </h3>
+            <p class="text-blue-800 mb-3">
+                Your order is being prepared for delivery via DoorDash. You'll receive SMS notifications with delivery updates directly from DoorDash.
+            </p>
+
+            {% if order.delivery.tracking_url %}
+            <a href="{{ order.delivery.tracking_url }}" target="_blank"
+               class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                <i class="ph ph-map-pin mr-2"></i>
+                Track Your Delivery
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Next Steps -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left">
+            <h3 class="text-lg font-semibold mb-3">What happens next?</h3>
+            <ul class="space-y-2 text-gray-700">
+                {% if order.delivery_method == 'delivery' %}
+                <li class="flex items-start">
+                    <i class="ph ph-check-circle text-green-600 mt-1 mr-2"></i>
+                    <span>We'll prepare your order and notify the businesses</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="ph ph-check-circle text-green-600 mt-1 mr-2"></i>
+                    <span>A DoorDash driver will be assigned to pick up your order</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="ph ph-check-circle text-green-600 mt-1 mr-2"></i>
+                    <span>You'll receive SMS updates about your delivery progress</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="ph ph-check-circle text-green-600 mt-1 mr-2"></i>
+                    <span>Your order will be delivered to your specified address</span>
+                </li>
+                {% else %}
+                <li class="flex items-start">
+                    <i class="ph ph-check-circle text-green-600 mt-1 mr-2"></i>
+                    <span>We'll notify the businesses about your order</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="ph ph-check-circle text-green-600 mt-1 mr-2"></i>
+                    <span>You'll receive email updates about your order status</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="ph ph-check-circle text-green-600 mt-1 mr-2"></i>
+                    <span>Contact the businesses directly to arrange pickup</span>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'user_orders' %}"
+               class="bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition duration-200">
+                View My Orders
+            </a>
+            <a href="{% url 'home' %}"
+               class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition duration-200">
+                Continue Shopping
+            </a>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="mt-8 text-sm text-gray-600">
+            <p>Questions about your order? Contact us at
+                <a href="mailto:dukaniethnicstore@gmail.com" class="text-blue-600 hover:underline">
+                    dukaniethnicstore@gmail.com
+                </a>
+            </p>
         </div>
     </div>
 </div>
-
-{% endblock content %}
+{% endblock %}

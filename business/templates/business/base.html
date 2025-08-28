@@ -47,13 +47,13 @@
                             </a>
                         </li>
                         <li class='h-full'>
-                            <a href="{% url "products" %}" 
+                            <a href="{% url "products" %}"
                                 class='text-button-uppercase duration-300 h-full flex items-center justify-center'>
                                 Products
                             </a>
                         </li>
                         <li class='h-full'>
-                            <a href="{% url "services" %}" 
+                            <a href="{% url "services" %}"
                                 class='text-button-uppercase duration-300 h-full flex items-center justify-center'>
                                 Services
                             </a>
@@ -67,7 +67,7 @@
                         </li>
                     </ul>
                 </div>
-                
+
                 <style>
                     @media (max-width: 768px) {
                         .text-button-uppercase ul {
@@ -108,14 +108,14 @@
         <div class='header-menu style-one absolute top-0 left-0 right-0 w-full md:h-[74px] h-[56px] bg-transparent'>
             <div class="container mx-auto h-full">
                 <div class="header-main flex justify-between h-full">
-                    <div class="menu-mobile-icon lg:hidden flex items-center">
+                    <div class="menu-mobile-icon flex items-center">
                         <i class="icon-category text-2xl"></i>
                     </div>
                     <div class="left flex items-center gap-16 w-full">
                         <a href='{% url "home" %}' id="desktopLogo" class='flex items-center max-lg:absolute max-lg:left-1/2 max-lg:-translate-x-1/2'>
                             <div class="heading4"><img style="height:130px" src='{% static "business/assets/images/banner/DukaniEthnicStore.png" %}'/></div>
                         </a>
-                        
+
                         <script>
                             function handleResize() {
                                 var logo = document.getElementById('desktopLogo');
@@ -125,21 +125,21 @@
                                     logo.style.display = 'flex';
                                 }
                             }
-                        
+
                             window.addEventListener('resize', handleResize);
                             handleResize(); // Call once to set initial state
                         </script>
                         <div class="search-container w-full max-w-xl">
                             <div class="form-search relative w-full">
                                 <form action="{% url 'search' %}" method="get" class="inline w-full">
-                                    <input name="q" type="text" placeholder='Searching...'
+                                    <input name="q" type="text" placeholder='Search products, brands and categories on Dukani...'
                                            class='text-button-lg h-14 rounded-2xl border border-line w-full pl-6 pr-12' />
                                     <i class="ph ph-magnifying-glass absolute heading5 right-6 top-1/2 -translate-y-1/2 cursor-pointer"></i>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    
+
                     <style>
                         @media (max-width: 768px) {
                             .search-container {
@@ -147,7 +147,7 @@
                                 padding: 0 1rem;
                             }
                         }
-                        
+
                         @media (min-width: 769px) {
                             .search-container {
                                 max-width: 900px;
@@ -175,8 +175,10 @@
                                         {% endif %}
                                         <div class="bottom pt-4 border-t border-line"></div>
                                         <a href='#!' class='body1 hover:underline'>Support</a>
+                                        <div class="bottom pt-4 border-t border-line"></div>
+                                        <a href='{% url "logout" %}' class='body1 hover:underline'>Logout</a>
                                     </div>
-                                </div>                                
+                                </div>
                                 <div class="list-action flex items-center gap-4">
                                     <a href="{% url "user_messages" %}">
                                         <div class="max-md:hidden message-icon flex items-center relative cursor-pointer">
@@ -184,11 +186,11 @@
                                             <span class="quantity message-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">{{ unread_message_count }}</span>
                                         </div>
                                     </a>
-                                    
+
                                     <div class="max-md:hidden wishlist-icon flex items-center relative cursor-pointer">
                                         <span class="quantity absolute -right-1.5 -top-1.5w-4 h-4 flex" style="color:#f7f5ef"></span>
                                     </div>
-                                    
+
                                     <div class="max-md:hidden cart-icon flex items-center relative cursor-pointer">
                                         <i class="ph-bold ph-handbag text-2xl"></i>
                                         <span class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">{{ cart_item_count }}</span>
@@ -223,12 +225,14 @@
                             </div>
 
                             <script>
-                            document.addEventListener('DOMContentLoaded', function() {
+                                document.addEventListener('DOMContentLoaded', function() {
                                 const userIcon = document.getElementById('user-icon');
                                 const loginPopup = document.getElementById('login-popup');
 
-                                // Show popup on page load for unauthenticated users
-                                loginPopup.classList.remove('hidden');
+                                {% if not request.user.is_authenticated %}
+                                    // Show popup on page load for unauthenticated users
+                                    loginPopup.classList.remove('hidden');
+                                {% endif %}
 
                                 // Toggle popup when user icon is clicked
                                 userIcon.addEventListener('click', function() {
@@ -248,52 +252,7 @@
                     </div>
                 </div>
             </div>
-            <div id="top-nav" class='top-nav style-one md:h-[44px] h-[30px]' style="background-color: transparent; transition: background-color 0.3s ease; margin-top: -10px; overflow-x: hidden;">
-                <div class="container mx-auto h-full">
-                    <div class="top-nav-main flex justify-between max-md:justify-center h-full">
-                        <div class="text-center text-button-uppercase flex items-center w-full">
-                            <ul class='flex items-center justify-between h-full w-full px-2' style="font-size: 14px; gap: 8px;">
-                                <li class='h-full relative'>
-                                    <a href="{% url 'products' %}?category=CL"
-                                        class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333; transition: color 0.3s ease; white-space: nowrap;">
-                                        <span class="md:inline hidden">CLOTHING</span>
-                                    </a>
-                                </li>
-                                <li class='h-full'>
-                                    <a href="{% url 'products' %}?category=BE"
-                                        class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333; transition: color 0.3s ease;">
-                                        BEAUTY
-                                    </a>
-                                </li>
-                                <li class='h-full'>
-                                    <a href="{% url 'products' %}?category=GR" 
-                                        class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333; transition: color 0.3s ease;">
-                                        GROCERY
-                                    </a>
-                                </li>
-                                <li class='h-full'>
-                                    <a href="{% url 'products' %}?category=HM" 
-                                        class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333; transition: color 0.3s ease;">
-                                        HOME
-                                    </a>
-                                </li>
-                                <li class='h-full'>
-                                    <a href="{% url 'products' %}?category=EL" 
-                                        class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333; transition: color 0.3s ease; white-space: nowrap;">
-                                        <span class="md:inline hidden">ELECTRONICS</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
+
             <style>
                 @media (max-width: 768px) {
                     #top-nav ul {
@@ -315,7 +274,7 @@
             document.addEventListener('DOMContentLoaded', function() {
                 var topNav = document.getElementById('top-nav');
                 var links = topNav.getElementsByTagName('a');
-        
+
                 window.addEventListener('scroll', function() {
                     if (window.scrollY > 50) {
                         topNav.style.backgroundColor = 'white';
@@ -378,7 +337,7 @@
                 <div class="form-search relative w-full">
                     <i class="ph ph-magnifying-glass absolute heading5 right-6 top-1/2 -translate-y-1/2 cursor-pointer"></i>
                     <form action="{% url 'search' %}" method="get" class="inline">
-                        <input name="q" type="text" placeholder='Searching...'
+                        <input name="q" type="text" placeholder='Search products, brands and categories on Dukani...'
                         class='text-button-lg h-14 rounded-2xl border border-line w-full pl-6 pr-12' />
                     </form>
                 </div>
@@ -486,7 +445,7 @@
                     <div class="heading px-6 pb-3 flex items-center justify-between relative">
                         <div class="heading5">Shopping Cart</div>
                     </div>
-                    
+
                     <div class="list-product px-6">
                         {% for item in cart_items %}
                         <div data-item="2" class="item py-5 flex items-center justify-between gap-3 border-b border-line">
@@ -505,7 +464,7 @@
                                             {{ variation }}{% if not forloop.last %} / {% endif %}
                                         {% endfor %}
                                     </div>
-                                    
+
                                 </div>
                             </div>
                         </div>
@@ -956,7 +915,7 @@
         {% endif %}
 
     </div>
-    
+
 
     {% block content %}
 
@@ -1047,7 +1006,7 @@
                 <div
                     class="footer-bottom py-3 flex items-center justify-between gap-5 max-lg:justify-center max-lg:flex-col border-t border-line">
                     <div class="left flex items-center gap-8">
-                        <div class="copyright caption1 text-secondary">©2024 Dukani. All Rights Reserved.</div>
+                        <div class="copyright caption1 text-secondary">©2025 Dukani. All Rights Reserved.</div>
                     </div>
                     <div class="right flex items-center gap-2">
                         <div class="caption1 text-secondary">Payment:</div>
