@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,23 +30,105 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+# Create logs directory if it doesn't exist
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
+
+    # Formatters define how log messages are formatted
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {module} {process:d} {thread:d} - {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '[{levelname}] {asctime} - {message}',
+            'style': '{',
+            'datefmt': '%H:%M:%S'
+        },
+        'detailed': {
+            'format': '[{levelname}] {asctime} {name} - {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',  # Change this to 'INFO' to avoid debug messages
+
+    # Handlers define where logs go
+    'handlers': {
+        # Console handler (what you see in terminal)
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
+        # File handler for all logs
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',  # Rotates automatically
+            'filename': os.path.join(LOG_DIR, 'django.log'),
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,  # Keep 5 backup files
+            'formatter': 'detailed',
+        },
+        # Separate file for EasyShip logs
+        'easyship_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'easyship.log'),
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 3,
+            'formatter': 'detailed',
+        },
+        # Error logs only
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'errors.log'),
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 3,
+            'formatter': 'verbose',
+        },
+    },
+
+    # Loggers define which handlers receive logs
+    'loggers': {
+        # Django's built-in logger
+        'django': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        # Your business app logger
+        'business': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # EasyShip service logger
+        'business.easyship_service': {
+            'handlers': ['console', 'easyship_file', 'error_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # Your other loggers
+        'users': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+
+    # Root logger catches everything else
+    'root': {
+        'handlers': ['console', 'file', 'error_file'],
+        'level': 'INFO',
     },
 }
-
 
 # DoorDash Drive API Configuration
 DOORDASH_DEVELOPER_ID = '811c829f-1159-4a96-b927-112a6ccc5e8e'  # From your screenshot
@@ -53,8 +136,16 @@ DOORDASH_KEY_ID = 'a76ac2a7-09df-4635-a5cb-86f3edbf3a06'  # From your screenshot
 DOORDASH_SIGNING_SECRET = 'OoAaVZ-ij_r4c0kM0kJTg7qOB7fP8MzPq7jyhZ6oIU'  # From your screenshot
 DOORDASH_BASE_URL = 'https://openapi.doordash.com/drive/v2'  # Sandbox URL
 
+
+
+# Keep session alive for 2 hours — long enough to complete registration + Stripe onboarding
+SESSION_COOKIE_AGE = 7200
+SESSION_SAVE_EVERY_REQUEST = True
+
+
 # Google Maps API Configuration
-GOOGLE_MAPS_API_KEY = 'AIzaSyD_jODWQ-KDeU65Sr4xOALQsZ7mwI3q7h4'
+#GOOGLE_MAPS_API_KEY = 'AIzaSyB0VtUqG6fKAi75im1nyZFHFHPfBmzH3j8'
+GOOGLE_MAPS_API_KEY = 'AIzaSyA1Fn93oOxNsLhhc3DjYhcaPik8AlC2rEA'
 
 
 # Application definition
@@ -81,6 +172,11 @@ MIDDLEWARE = [
     'business.middleware.NoDebugMessagesMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'business.middleware.AjaxMiddleware',
+]
+
+AUTHENTICATION_BACKENDS = [
+    'users.backends.EmailOrUsernameAuthBackend',  # Custom backend (FIRST!)
+    'django.contrib.auth.backends.ModelBackend',   # Default backend (fallback)
 ]
 
 ROOT_URLCONF = 'ecom.urls'
@@ -160,21 +256,62 @@ USE_I18N = True
 USE_TZ = True
 
 
-
-
 # Stripe settings
-#STRIPE_SECRET_KEY = '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'
-#STRIPE_PUBLIC_KEY = 'pk_live_51PVl0mRvafFWMAqoRdQSQ6c7bjc4ygSkDWh7fMGk9iiT9xQKw0tbaiKy6QTQvllVMc8E471xMA4O4qhTQXuNmi3X00siAayXXj'
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
+STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')
 
 
-STRIPE_SECRET_KEY = 'sk_test_51P4gElP9SsicgG1jiHrOYu86MB4PNBRKMTxSgCHrCpPGaWrs68tkgtsUMx8CBZ7Nv0BXd9nFMAyuia4mSEo60Tdj00iH6Li1dk'
-STRIPE_PUBLIC_KEY = 'pk_test_51P4gElP9SsicgG1jB3b9vewTDC2pbRh3YOUKAaavO88BIFyqQgIg3FJzmy9NDwitrtwS8BXHUYhG2R2WtuuqfLFw00ZdmOuvHt'
-STRIPE_PRODUCT_BUSINESS_PRICE_ID = 'price_1RHUo2P9SsicgG1jYieDVTOO'  # A$12/month with 3-month free trial
-STRIPE_SERVICE_BUSINESS_PRICE_ID = 'price_1RHUovP9SsicgG1jY0FLVRg1'  # A$10/month with 3-month free trial
-STRIPE_BOTH_BUSINESS_PRICE_ID = 'price_1RHUpcP9SsicgG1jFQtfzR1C'     # A$20/month with 3-month free trial
+#STRIPE_SECRET_KEY = 'sk_test_51P4gElP9SsicgG1jiHrOYu86MB4PNBRKMTxSgCHrCpPGaWrs68tkgtsUMx8CBZ7Nv0BXd9nFMAyuia4mSEo60Tdj00iH6Li1dk'
+#STRIPE_PUBLIC_KEY = 'pk_test_51P4gElP9SsicgG1jB3b9vewTDC2pbRh3YOUKAaavO88BIFyqQgIg3FJzmy9NDwitrtwS8BXHUYhG2R2WtuuqfLFw00ZdmOuvHt'
+
+#test
+#STRIPE_PRODUCT_BUSINESS_PRICE_ID = 'price_1RHUo2P9SsicgG1jYieDVTOO'  # A$12/month with 3-month free trial
+#STRIPE_SERVICE_BUSINESS_PRICE_ID = 'price_1RHUovP9SsicgG1jY0FLVRg1'  # A$10/month with 3-month free trial
+#STRIPE_BOTH_BUSINESS_PRICE_ID = 'price_1RHUpcP9SsicgG1jFQtfzR1C'     # A$20/month with 3-month free trial
+
+STRIPE_PRODUCT_BUSINESS_PRICE_ID = 'price_1THR9MRvafFWMAqotYkJHxF0'  # A$12/month with 3-month free trial
+STRIPE_SERVICE_BUSINESS_PRICE_ID = 'price_1THRApRvafFWMAqouB3NTod6'  # A$10/month with 3-month free trial
+STRIPE_BOTH_BUSINESS_PRICE_ID = 'price_1THRASRvafFWMAqoTbY8lKtU'     # A$20/month with 3-month free trial
+#STRIPE_BOTH_BUSINESS_PRICE_ID = 'price_1TT1K0RvafFWMAqouqplVnN8'
+
+# ShipStation Configuration
+SHIPSTATION_API_KEY = 'acDM36M+MgpnpJEk20gjA+F5gQCTYu1ZCYdNydXCtpE'
+SHIPSTATION_API_SECRET = ''  # You might need this from your account
+SHIPSTATION_BASE_URL = 'https://api.shipstation.com'  # Production
+SHIPSTATION_SANDBOX_URL = 'https://docs.shipstation.com/_mock/openapi'  # Sandbox
+SHIPSTATION_USE_SANDBOX = False  # Set to False for production
 
 
-SHIPPIT_API_KEY = '9DKhF5UavAlLZioVVJxUsA'  # Your Shippit API key
+EASYSHIP_SANDBOX_TOKEN    = 'sand_lClOJZEjEMzctPittAKsxqyQ4+TbUp48potfeLCUEAY='
+EASYSHIP_PRODUCTION_TOKEN = 'prod_KDVcSHO95GxLAj20/pTfsSN/T1q4SsiSR9yAyp6Su08=+FE='
+EASYSHIP_USE_SANDBOX      = False   # ← flip to False when ready to go live
+
+
+#EASYSHIP_SANDBOX_TOKEN    = 'sand_ryjnmvKRVNtISLSK+KuDOK2Ag2oiXhl1zCLF/qzr4IY='
+#EASYSHIP_PRODUCTION_TOKEN = 'prod_XEwn4rsGUn9ry1jdrFEmmu9BW98mOzdyICH8WU37+FE='
+#EASYSHIP_USE_SANDBOX      = True   # ← flip to False when ready to go live
+
+# The public URL EasyShip will POST webhook events to.
+# Must be reachable from the internet (not localhost).
+EASYSHIP_WEBHOOK_URL = 'https://www.dukaniethnicstore.com.au/webhooks/easyship/'
+
+#Sendle
+SENDLE_API_KEY = 'sandbox_nhY3NZP8QKBsbmYry5VZKqPS'  # Your Sendle API Key
+SENDLE_SENDER_ID = 'SANDBOX_abrarshahriar360_yah'    # Your Sendle Sender ID
+
+# Sendle Environment
+# Set to False for production, True for testing
+SENDLE_USE_SANDBOX = True
+
+
+# Default shipping settings
+DEFAULT_PACKAGE_WEIGHT_KG = 1.0  # Default weight if not specified
+DEFAULT_PACKAGE_VOLUME_M3 = 0.001  # Default volume if not specified
+
+# Shipping buffer days (how many days ahead to schedule pickup)
+SHIPPING_PICKUP_BUFFER_DAYS = 1
+
+SHIPPIT_API_KEY = 'ir5RenGkfkNS-N6rAIabhA'  # Your Shippit API key
 SHIPPIT_API_URL = 'https://app.shippit.com/api/3'  # Shippit API endpoint
 SHIPPIT_ENVIRONMENT = 'sandbox'  # or 'production' for production
 
